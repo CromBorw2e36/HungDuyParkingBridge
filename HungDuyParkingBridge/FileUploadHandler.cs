@@ -14,11 +14,16 @@ namespace HungDuyParkingBridge
     internal class FileUploadHandler
     {
         private readonly string _savePath;
+        private readonly FileApiHandler _apiHandler;
+       
 
-        public FileUploadHandler(string savePath)
+        public FileUploadHandler(string savePath, FileApiHandler apiHandler)
         {
             _savePath = savePath;
+            _apiHandler = apiHandler;
         }
+
+       
 
         public async Task<bool> TryHandle(HttpListenerContext context)
         {   
@@ -41,6 +46,7 @@ namespace HungDuyParkingBridge
 
             var multipartReader = new MultipartReader(boundary, request.InputStream);
             var section = await multipartReader.ReadNextSectionAsync();
+            var uploadedFiles = new List<string>();
 
             while (section != null)
             {
@@ -52,18 +58,50 @@ namespace HungDuyParkingBridge
                         ? contentDisp.FileName.Value.Trim('"')
                         : $"uploaded_{DateTime.Now.Ticks}.bin";
 
+                    // Ensure unique filename
+                    fileName = GetUniqueFileName(fileName);
+
                     string filePath = Path.Combine(_savePath, fileName);
                     using var fs = File.Create(filePath);
                     await section.Body.CopyToAsync(fs);
+
+                    // Register file with API handler
+                    var fileInfo = new FileInfo(filePath);
+                    _apiHandler.RegisterFile(fileName, fileInfo.Length);
+                    uploadedFiles.Add(fileName);
                 }
 
                 section = await multipartReader.ReadNextSectionAsync();
             }
 
             response.StatusCode = 200;
-            await response.OutputStream.WriteAsync("OK"u8.ToArray());
+            response.ContentType = "application/json";
+            var responseJson = System.Text.Json.JsonSerializer.Serialize(new 
+            { 
+                success = true, 
+                message = "Files uploaded successfully", 
+                files = uploadedFiles 
+            });
+            await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(responseJson));
             response.Close();
             return true;
+        }
+
+        private string GetUniqueFileName(string fileName)
+        {
+            var baseName = Path.GetFileNameWithoutExtension(fileName);
+            var extension = Path.GetExtension(fileName);
+            var filePath = Path.Combine(_savePath, fileName);
+            var counter = 1;
+
+            while (File.Exists(filePath))
+            {
+                fileName = $"{baseName}_{counter}{extension}";
+                filePath = Path.Combine(_savePath, fileName);
+                counter++;
+            }
+
+            return fileName;
         }
 
         private static void AddCorsHeaders(HttpListenerResponse response)

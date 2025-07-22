@@ -18,7 +18,7 @@ namespace HungDuyParkingBridge
             _listener.Prefixes.Add("http://localhost:5000/");
             _listener.Start();
 
-            _uploadHandler = new FileUploadHandler(_savePath);
+            _uploadHandler = new FileUploadHandler(_savePath, new FileApiHandler(_savePath));
             _downloadHandler = new FileDownloadHandler(_savePath);
 
             Task.Run(async () =>
