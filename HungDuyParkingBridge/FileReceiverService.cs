@@ -12,13 +12,16 @@ namespace HungDuyParkingBridge
         private readonly string _savePath = @"C:\HungDuyParkingReceivedFiles";
         private FileUploadHandler _uploadHandler;
         private FileDownloadHandler _downloadHandler;
+        private FileApiHandler _apiHandler;
+
         public void Start()
         {
             Directory.CreateDirectory(_savePath);
             _listener.Prefixes.Add("http://localhost:5000/");
             _listener.Start();
 
-            _uploadHandler = new FileUploadHandler(_savePath, new FileApiHandler(_savePath));
+            _apiHandler = new FileApiHandler(_savePath);
+            _uploadHandler = new FileUploadHandler(_savePath, _apiHandler);
             _downloadHandler = new FileDownloadHandler(_savePath);
 
             Task.Run(async () =>
@@ -35,13 +38,15 @@ namespace HungDuyParkingBridge
                         {
                             var resp = context.Response;
                             resp.AddHeader("Access-Control-Allow-Origin", "*");
-                            resp.AddHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+                            resp.AddHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
                             resp.AddHeader("Access-Control-Allow-Headers", "*");
                             resp.StatusCode = 200;
                             resp.Close();
                             continue;
                         }
 
+                        // Try API handler first
+                        if (await _apiHandler.TryHandle(context)) continue;
                         if (await _uploadHandler.TryHandle(context)) continue;
                         if (await _downloadHandler.TryHandle(context)) continue;
 

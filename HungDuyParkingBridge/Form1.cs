@@ -38,15 +38,54 @@ namespace HungDuyParkingBridge
                 Environment.Exit(0);
             });
 
+            // Load the custom icon
+            Icon customIcon = GetApplicationIcon();
+
             trayIcon = new NotifyIcon
             {
                 Text = "Hùng Duy Parking FileReceiver Beta",
-                Icon = SystemIcons.Application,
+                Icon = customIcon,
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };
 
             trayIcon.DoubleClick += (s, e) => this.Show();
+        }
+
+        private Icon GetApplicationIcon()
+        {
+            try
+            {
+                // Try to load the icon from the application directory
+                string iconPath = Path.Combine(Application.StartupPath, "logoTapDoan.ico");
+                if (File.Exists(iconPath))
+                {
+                    return new Icon(iconPath);
+                }
+
+                // Try to load from embedded resources
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var resourceName = assembly.GetManifestResourceNames()
+                    .FirstOrDefault(name => name.EndsWith("logoTapDoan.ico"));
+                
+                if (!string.IsNullOrEmpty(resourceName))
+                {
+                    using var stream = assembly.GetManifestResourceStream(resourceName);
+                    if (stream != null)
+                    {
+                        return new Icon(stream);
+                    }
+                }
+
+                // Fallback to system icon if custom icon is not found
+                return SystemIcons.Application;
+            }
+            catch (Exception ex)
+            {
+                // Log error and use default icon
+                System.Diagnostics.Debug.WriteLine($"Error loading custom icon: {ex.Message}");
+                return SystemIcons.Application;
+            }
         }
 
         private void AddToStartup()
