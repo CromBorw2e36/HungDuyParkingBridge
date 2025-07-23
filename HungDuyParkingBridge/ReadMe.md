@@ -1,4 +1,8 @@
-﻿Lệnh build source
+﻿Lệnh publish .exe
 ```bash
-cd "K:\Project\HungDuyCoLTD\HungDuyParkingBridge\HungDuyParkingBridge"
+
+cd .\HungDuyParkingBridge\
+
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+
 ```
