@@ -1,4 +1,4 @@
-﻿namespace HungDuyParkingBridge.UI
+namespace HungDuyParkingBridge.UI
 {
     partial class FilePreviewForm
     {
@@ -69,7 +69,7 @@
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new Size(120, 21);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Xem trước File";
+            this.lblTitle.Text = "File Preview";
             // 
             // panel2
             // 
@@ -93,7 +93,7 @@
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new Size(100, 30);
             this.btnClose.TabIndex = 2;
-            this.btnClose.Text = "Đóng";
+            this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new EventHandler(this.btnClose_Click);
             // 
@@ -106,7 +106,7 @@
             this.btnOpenFolder.Name = "btnOpenFolder";
             this.btnOpenFolder.Size = new Size(120, 30);
             this.btnOpenFolder.TabIndex = 1;
-            this.btnOpenFolder.Text = "Mở thư mục";
+            this.btnOpenFolder.Text = "Open Folder";
             this.btnOpenFolder.UseVisualStyleBackColor = false;
             this.btnOpenFolder.Click += new EventHandler(this.btnOpenFolder_Click);
             // 
@@ -119,7 +119,7 @@
             this.btnOpenFile.Name = "btnOpenFile";
             this.btnOpenFile.Size = new Size(120, 30);
             this.btnOpenFile.TabIndex = 0;
-            this.btnOpenFile.Text = "Mở file";
+            this.btnOpenFile.Text = "Open File";
             this.btnOpenFile.UseVisualStyleBackColor = false;
             this.btnOpenFile.Click += new EventHandler(this.btnOpenFile_Click);
             // 
@@ -145,7 +145,7 @@
             this.lblFilePath.Name = "lblFilePath";
             this.lblFilePath.Size = new Size(72, 15);
             this.lblFilePath.TabIndex = 4;
-            this.lblFilePath.Text = "Đường dẫn:";
+            this.lblFilePath.Text = "Path:";
             // 
             // lblModifiedDate
             // 
@@ -155,7 +155,7 @@
             this.lblModifiedDate.Name = "lblModifiedDate";
             this.lblModifiedDate.Size = new Size(62, 15);
             this.lblModifiedDate.TabIndex = 3;
-            this.lblModifiedDate.Text = "Ngày sửa:";
+            this.lblModifiedDate.Text = "Modified:";
             // 
             // lblCreatedDate
             // 
@@ -165,7 +165,7 @@
             this.lblCreatedDate.Name = "lblCreatedDate";
             this.lblCreatedDate.Size = new Size(61, 15);
             this.lblCreatedDate.TabIndex = 2;
-            this.lblCreatedDate.Text = "Ngày tạo:";
+            this.lblCreatedDate.Text = "Created:";
             // 
             // lblFileSize
             // 
@@ -175,7 +175,7 @@
             this.lblFileSize.Name = "lblFileSize";
             this.lblFileSize.Size = new Size(70, 15);
             this.lblFileSize.TabIndex = 1;
-            this.lblFileSize.Text = "Kích thước:";
+            this.lblFileSize.Text = "Size:";
             // 
             // lblFileName
             // 
@@ -185,7 +185,7 @@
             this.lblFileName.Name = "lblFileName";
             this.lblFileName.Size = new Size(62, 19);
             this.lblFileName.TabIndex = 0;
-            this.lblFileName.Text = "Tên file:";
+            this.lblFileName.Text = "File name:";
             // 
             // panel4
             // 
@@ -235,7 +235,7 @@
             this.MinimumSize = new Size(600, 400);
             this.Name = "FilePreviewForm";
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text = "Xem trước File - Hùng Duy Parking";
+            this.Text = "File Preview - Hung Duy Parking";
             this.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

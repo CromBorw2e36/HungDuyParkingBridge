@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using HungDuyParkingBridge.Utils;
 
 namespace HungDuyParkingBridge.Handlers

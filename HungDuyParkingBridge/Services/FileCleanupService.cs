@@ -1,4 +1,4 @@
-using System.Diagnostics;
+Ôªøusing System.Diagnostics;
 
 namespace HungDuyParkingBridge.Services
 {
@@ -49,11 +49,11 @@ namespace HungDuyParkingBridge.Services
                     try
                     {
                         File.Delete(file);
-                        Debug.WriteLine($"[FileCleanup] ?„ xÛa file c?: {Path.GetFileName(file)}");
+                        Debug.WriteLine($"[FileCleanup] ?√£ x√≥a file c?: {Path.GetFileName(file)}");
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"[FileCleanup] L?i xÛa file {Path.GetFileName(file)}: {ex.Message}");
+                        Debug.WriteLine($"[FileCleanup] L?i x√≥a file {Path.GetFileName(file)}: {ex.Message}");
                     }
                 }
 
@@ -62,12 +62,12 @@ namespace HungDuyParkingBridge.Services
                 
                 if (filesToDelete.Count > 0)
                 {
-                    Debug.WriteLine($"[FileCleanup] ?„ xÛa {filesToDelete.Count} file c? (h?n {DeleteAfterDays} ng‡y)");
+                    Debug.WriteLine($"[FileCleanup] ?√£ x√≥a {filesToDelete.Count} file c? (h?n {DeleteAfterDays} ng√†y)");
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[FileCleanup] L?i trong qu· trÏnh d?n d?p: {ex.Message}");
+                Debug.WriteLine($"[FileCleanup] L?i trong qu√° tr√¨nh d?n d?p: {ex.Message}");
             }
         }
 
@@ -83,13 +83,13 @@ namespace HungDuyParkingBridge.Services
                     if (!Directory.EnumerateFileSystemEntries(directory).Any())
                     {
                         Directory.Delete(directory);
-                        Debug.WriteLine($"[FileCleanup] ?„ xÛa th? m?c tr?ng: {Path.GetFileName(directory)}");
+                        Debug.WriteLine($"[FileCleanup] ?√£ x√≥a th? m?c tr?ng: {Path.GetFileName(directory)}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[FileCleanup] L?i xÛa th? m?c tr?ng: {ex.Message}");
+                Debug.WriteLine($"[FileCleanup] L?i x√≥a th? m?c tr?ng: {ex.Message}");
             }
         }
 

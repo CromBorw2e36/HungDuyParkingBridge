@@ -1,4 +1,4 @@
-﻿namespace HungDuyParkingBridge.UI
+namespace HungDuyParkingBridge.UI
 {
     partial class FileCompareForm
     {
@@ -83,7 +83,7 @@
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new Size(114, 21);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "So sánh File";
+            this.lblTitle.Text = "Compare Files";
             // 
             // panel2
             // 
@@ -107,7 +107,7 @@
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new Size(100, 30);
             this.btnClose.TabIndex = 2;
-            this.btnClose.Text = "Đóng";
+            this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new EventHandler(this.btnClose_Click);
             // 
@@ -120,7 +120,7 @@
             this.btnOpenFile2.Name = "btnOpenFile2";
             this.btnOpenFile2.Size = new Size(120, 30);
             this.btnOpenFile2.TabIndex = 1;
-            this.btnOpenFile2.Text = "Mở File 2";
+            this.btnOpenFile2.Text = "Open File 2";
             this.btnOpenFile2.UseVisualStyleBackColor = false;
             this.btnOpenFile2.Click += new EventHandler(this.btnOpenFile2_Click);
             // 
@@ -133,7 +133,7 @@
             this.btnOpenFile1.Name = "btnOpenFile1";
             this.btnOpenFile1.Size = new Size(120, 30);
             this.btnOpenFile1.TabIndex = 0;
-            this.btnOpenFile1.Text = "Mở File 1";
+            this.btnOpenFile1.Text = "Open File 1";
             this.btnOpenFile1.UseVisualStyleBackColor = false;
             this.btnOpenFile1.Click += new EventHandler(this.btnOpenFile1_Click);
             // 
@@ -158,7 +158,7 @@
             this.lblTimeDiff.Name = "lblTimeDiff";
             this.lblTimeDiff.Size = new Size(66, 15);
             this.lblTimeDiff.TabIndex = 3;
-            this.lblTimeDiff.Text = "Thời gian:";
+            this.lblTimeDiff.Text = "Time:";
             // 
             // lblSizeDiff
             // 
@@ -168,7 +168,7 @@
             this.lblSizeDiff.Name = "lblSizeDiff";
             this.lblSizeDiff.Size = new Size(71, 15);
             this.lblSizeDiff.TabIndex = 2;
-            this.lblSizeDiff.Text = "Chênh lệch:";
+            this.lblSizeDiff.Text = "Difference:";
             // 
             // lblFile2Info
             // 
@@ -328,7 +328,7 @@
             this.lblComparisonResult.Padding = new Padding(5);
             this.lblComparisonResult.Size = new Size(1180, 80);
             this.lblComparisonResult.TabIndex = 0;
-            this.lblComparisonResult.Text = "Kết quả so sánh sẽ hiển thị ở đây...";
+            this.lblComparisonResult.Text = "Comparison results will be displayed here...";
             // 
             // FileCompareForm
             // 
@@ -343,7 +343,7 @@
             this.MinimumSize = new Size(800, 600);
             this.Name = "FileCompareForm";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "So sánh File - Hùng Duy Parking";
+            this.Text = "Compare Files - Hung Duy Parking";
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);

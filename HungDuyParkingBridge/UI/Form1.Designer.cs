@@ -64,13 +64,13 @@
             // 
             lblStatus.Name = "lblStatus";
             lblStatus.Size = new Size(63, 17);
-            lblStatus.Text = "Trạng thái:";
+            lblStatus.Text = "Tráº¡ng thÃ¡i:";
             // 
             // lblFileCount
             // 
             lblFileCount.Name = "lblFileCount";
             lblFileCount.Size = new Size(51, 17);
-            lblFileCount.Text = "Số file: 0";
+            lblFileCount.Text = "Sá»‘ file: 0";
             // 
             // panel1
             // 
@@ -94,7 +94,7 @@
             btnFileManager.Name = "btnFileManager";
             btnFileManager.Size = new Size(100, 30);
             btnFileManager.TabIndex = 2;
-            btnFileManager.Text = "Quản lý File";
+            btnFileManager.Text = "Quáº£n lÃ½ File";
             btnFileManager.UseVisualStyleBackColor = false;
             btnFileManager.Click += btnFileManager_Click;
             // 
@@ -108,7 +108,7 @@
             btnMinimize.Name = "btnMinimize";
             btnMinimize.Size = new Size(100, 30);
             btnMinimize.TabIndex = 1;
-            btnMinimize.Text = "Ẩn xuống Tray";
+            btnMinimize.Text = "áº¨n xuá»‘ng Tray";
             btnMinimize.UseVisualStyleBackColor = false;
             btnMinimize.Click += btnMinimize_Click;
             // 
@@ -121,7 +121,7 @@
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(288, 25);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Hùng Duy Parking FileReceiver";
+            lblTitle.Text = "HÃ¹ng Duy Parking FileReceiver";
             // 
             // panel2
             // 
@@ -147,7 +147,7 @@
             chkAutoDelete.Name = "chkAutoDelete";
             chkAutoDelete.Size = new Size(114, 23);
             chkAutoDelete.TabIndex = 6;
-            chkAutoDelete.Text = "ngày (Bật/Tắt)";
+            chkAutoDelete.Text = "ngÃ y (Báº­t/Táº¯t)";
             chkAutoDelete.UseVisualStyleBackColor = true;
             chkAutoDelete.CheckedChanged += chkAutoDelete_CheckedChanged;
             // 
@@ -170,7 +170,7 @@
             lblAutoDelete.Name = "lblAutoDelete";
             lblAutoDelete.Size = new Size(113, 19);
             lblAutoDelete.TabIndex = 4;
-            lblAutoDelete.Text = "Tự động xóa sau:";
+            lblAutoDelete.Text = "Tá»± Ä‘á»™ng xÃ³a sau:";
             // 
             // txtFilesSaved
             // 
@@ -190,7 +190,7 @@
             lblFilesSaved.Name = "lblFilesSaved";
             lblFilesSaved.Size = new Size(110, 19);
             lblFilesSaved.TabIndex = 2;
-            lblFilesSaved.Text = "Thư mục lưu trữ:";
+            lblFilesSaved.Text = "ThÆ° má»¥c lÆ°u trá»¯:";
             // 
             // txtServerUrl
             // 
@@ -228,7 +228,7 @@
             MinimumSize = new Size(600, 400);
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Hùng Duy Parking FileReceiver";
+            Text = "HÃ¹ng Duy Parking FileReceiver";
             FormClosing += Form1_FormClosing;
             Resize += Form1_Resize;
             statusStrip1.ResumeLayout(false);

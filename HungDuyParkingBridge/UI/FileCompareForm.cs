@@ -51,8 +51,8 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                txtFile1.Text = $"L?i so sánh file: {ex.Message}";
-                txtFile2.Text = $"L?i so sánh file: {ex.Message}";
+                txtFile1.Text = $"Error comparing files: {ex.Message}";
+                txtFile2.Text = $"Error comparing files: {ex.Message}";
             }
         }
 
@@ -63,19 +63,19 @@ namespace HungDuyParkingBridge.UI
             
             // Show file size difference
             long sizeDiff = _file2Info.Length - _file1Info.Length;
-            string sizeDiffText = sizeDiff == 0 ? "Cùng kích th??c" : 
-                                 sizeDiff > 0 ? $"File 2 l?n h?n {FormatFileSize(sizeDiff)}" :
-                                 $"File 1 l?n h?n {FormatFileSize(-sizeDiff)}";
+            string sizeDiffText = sizeDiff == 0 ? "Same size" : 
+                                 sizeDiff > 0 ? $"File 2 is larger by {FormatFileSize(sizeDiff)}" :
+                                 $"File 1 is larger by {FormatFileSize(-sizeDiff)}";
             
-            lblSizeDiff.Text = $"Chênh l?ch: {sizeDiffText}";
+            lblSizeDiff.Text = $"Difference: {sizeDiffText}";
             
             // Show time difference
             var timeDiff = _file2Info.LastWriteTime - _file1Info.LastWriteTime;
-            string timeDiffText = timeDiff.TotalSeconds == 0 ? "Cùng th?i gian s?a ??i" :
-                                 timeDiff.TotalSeconds > 0 ? $"File 2 m?i h?n {FormatTimeDiff(timeDiff)}" :
-                                 $"File 1 m?i h?n {FormatTimeDiff(-timeDiff)}";
+            string timeDiffText = timeDiff.TotalSeconds == 0 ? "Same modification time" :
+                                 timeDiff.TotalSeconds > 0 ? $"File 2 is newer by {FormatTimeDiff(timeDiff)}" :
+                                 $"File 1 is newer by {FormatTimeDiff(-timeDiff)}";
             
-            lblTimeDiff.Text = $"Th?i gian: {timeDiffText}";
+            lblTimeDiff.Text = $"Time: {timeDiffText}";
         }
 
         private void CompareTextFiles()
@@ -97,14 +97,14 @@ namespace HungDuyParkingBridge.UI
                 var lines1 = content1.Split('\n');
                 var lines2 = content2.Split('\n');
                 
-                lblComparisonResult.Text = $"File 1: {lines1.Length} dòng, {content1.Length} ký t?\n" +
-                                          $"File 2: {lines2.Length} dòng, {content2.Length} ký t?\n" +
-                                          $"Gi?ng nhau: {(content1 == content2 ? "Có" : "Không")}";
+                lblComparisonResult.Text = $"File 1: {lines1.Length} lines, {content1.Length} characters\n" +
+                                          $"File 2: {lines2.Length} lines, {content2.Length} characters\n" +
+                                          $"Identical: {(content1 == content2 ? "Yes" : "No")}";
             }
             catch (Exception ex)
             {
-                txtFile1.Text = $"L?i ??c file text: {ex.Message}";
-                txtFile2.Text = $"L?i ??c file text: {ex.Message}";
+                txtFile1.Text = $"Error reading text file: {ex.Message}";
+                txtFile2.Text = $"Error reading text file: {ex.Message}";
             }
         }
 
@@ -158,14 +158,14 @@ namespace HungDuyParkingBridge.UI
                 txtFile2.Visible = false;
                 
                 // Show image comparison info
-                lblComparisonResult.Text = $"?nh 1: {img1.Width}x{img1.Height} pixels, {img1.RawFormat}\n" +
-                                          $"?nh 2: {img2.Width}x{img2.Height} pixels, {img2.RawFormat}\n" +
-                                          $"Cùng kích th??c: {(img1.Size == img2.Size ? "Có" : "Không")}\n" +
-                                          $"Cùng ??nh d?ng: {(img1.RawFormat.Equals(img2.RawFormat) ? "Có" : "Không")}";
+                lblComparisonResult.Text = $"Image 1: {img1.Width}x{img1.Height} pixels, {img1.RawFormat}\n" +
+                                          $"Image 2: {img2.Width}x{img2.Height} pixels, {img2.RawFormat}\n" +
+                                          $"Same dimensions: {(img1.Size == img2.Size ? "Yes" : "No")}\n" +
+                                          $"Same format: {(img1.RawFormat.Equals(img2.RawFormat) ? "Yes" : "No")}";
             }
             catch (Exception ex)
             {
-                lblComparisonResult.Text = $"L?i so sánh ?nh: {ex.Message}";
+                lblComparisonResult.Text = $"Error comparing images: {ex.Message}";
                 pictureBox1.Visible = false;
                 pictureBox2.Visible = false;
                 txtFile1.Visible = true;
@@ -176,24 +176,24 @@ namespace HungDuyParkingBridge.UI
         private void ShowBasicComparison()
         {
             txtFile1.Text = $"File: {_file1Info.Name}\n" +
-                           $"Lo?i: {_file1Info.Extension.ToUpperInvariant()}\n" +
-                           $"Kích th??c: {FormatFileSize(_file1Info.Length)}\n" +
-                           $"Ngày t?o: {_file1Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
-                           $"Ngày s?a: {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
+                           $"Type: {_file1Info.Extension.ToUpperInvariant()}\n" +
+                           $"Size: {FormatFileSize(_file1Info.Length)}\n" +
+                           $"Created: {_file1Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
+                           $"Modified: {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
                            
             txtFile2.Text = $"File: {_file2Info.Name}\n" +
-                           $"Lo?i: {_file2Info.Extension.ToUpperInvariant()}\n" +
-                           $"Kích th??c: {FormatFileSize(_file2Info.Length)}\n" +
-                           $"Ngày t?o: {_file2Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
-                           $"Ngày s?a: {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
+                           $"Type: {_file2Info.Extension.ToUpperInvariant()}\n" +
+                           $"Size: {FormatFileSize(_file2Info.Length)}\n" +
+                           $"Created: {_file2Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
+                           $"Modified: {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
             
             bool sameType = _file1Info.Extension.Equals(_file2Info.Extension, StringComparison.OrdinalIgnoreCase);
             bool sameSize = _file1Info.Length == _file2Info.Length;
             bool sameContent = sameSize && File.ReadAllBytes(_file1Path).SequenceEqual(File.ReadAllBytes(_file2Path));
             
-            lblComparisonResult.Text = $"Cùng lo?i file: {(sameType ? "Có" : "Không")}\n" +
-                                      $"Cùng kích th??c: {(sameSize ? "Có" : "Không")}\n" +
-                                      $"N?i dung gi?ng nhau: {(sameContent ? "Có" : "Không")}";
+            lblComparisonResult.Text = $"Same file type: {(sameType ? "Yes" : "No")}\n" +
+                                      $"Same size: {(sameSize ? "Yes" : "No")}\n" +
+                                      $"Same content: {(sameContent ? "Yes" : "No")}";
         }
 
         private void HighlightTextDifferences(string content1, string content2)
@@ -216,7 +216,7 @@ namespace HungDuyParkingBridge.UI
             
             if (differentLines > 0)
             {
-                lblComparisonResult.Text += $"\nS? dòng khác nhau: {differentLines}";
+                lblComparisonResult.Text += $"\nDifferent lines: {differentLines}";
             }
         }
 
@@ -275,12 +275,12 @@ namespace HungDuyParkingBridge.UI
         private string FormatTimeDiff(TimeSpan diff)
         {
             if (diff.TotalDays >= 1)
-                return $"{(int)diff.TotalDays} ngày";
+                return $"{(int)diff.TotalDays} days";
             if (diff.TotalHours >= 1)
-                return $"{(int)diff.TotalHours} gi?";
+                return $"{(int)diff.TotalHours} hours";
             if (diff.TotalMinutes >= 1)
-                return $"{(int)diff.TotalMinutes} phút";
-            return $"{(int)diff.TotalSeconds} giây";
+                return $"{(int)diff.TotalMinutes} minutes";
+            return $"{(int)diff.TotalSeconds} seconds";
         }
 
         private void btnOpenFile1_Click(object sender, EventArgs e)
@@ -294,7 +294,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Không th? m? file 1: {ex.Message}", "L?i", 
+                MessageBox.Show($"Cannot open file 1: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -310,7 +310,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Không th? m? file 2: {ex.Message}", "L?i", 
+                MessageBox.Show($"Cannot open file 2: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

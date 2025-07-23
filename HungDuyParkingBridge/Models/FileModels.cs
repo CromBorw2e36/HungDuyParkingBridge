@@ -1,4 +1,4 @@
-namespace HungDuyParkingBridge.Models
+﻿namespace HungDuyParkingBridge.Models
 {
     public class FileMetadata
     {

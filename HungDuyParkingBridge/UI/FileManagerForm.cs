@@ -1,4 +1,4 @@
-﻿using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Services;
 using System.Diagnostics;
 using System.Text;
 using System.Globalization;
