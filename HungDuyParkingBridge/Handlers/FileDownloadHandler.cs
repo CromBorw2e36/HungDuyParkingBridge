@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using HungDuyParkingBridge.Utils;
 
-namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.Handlers
 {
     internal class FileDownloadHandler
     {
@@ -24,7 +20,7 @@ namespace HungDuyParkingBridge
             if (request.HttpMethod != "GET" || !request.Url?.AbsolutePath.StartsWith("/files/") == true)
                 return false;
 
-            AddCorsHeaders(response);
+            HttpHelper.AddCorsHeaders(response);
 
             string fileName = WebUtility.UrlDecode(request.Url.AbsolutePath["/files/".Length..]);
             string filePath = Path.Combine(_savePath, fileName);
@@ -39,31 +35,11 @@ namespace HungDuyParkingBridge
 
             byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
             response.StatusCode = 200;
-            response.ContentType = GetMimeType(fileName);
+            response.ContentType = MimeTypeHelper.GetMimeType(fileName);
             response.ContentLength64 = fileBytes.Length;
             await response.OutputStream.WriteAsync(fileBytes);
             response.Close();
             return true;
-        }
-
-        private static void AddCorsHeaders(HttpListenerResponse response)
-        {
-            response.AddHeader("Access-Control-Allow-Origin", "*");
-            response.AddHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-            response.AddHeader("Access-Control-Allow-Headers", "*");
-        }
-
-        private static string GetMimeType(string fileName)
-        {
-            return Path.GetExtension(fileName).ToLowerInvariant() switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                ".pdf" => "application/pdf",
-                ".txt" => "text/plain",
-                _ => "application/octet-stream"
-            };
         }
     }
 }

@@ -1,29 +1,23 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
-using System.Net;
+using System.Text;
+using HungDuyParkingBridge.Models;
+using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Utils;
 
-namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.Handlers
 {
     internal class FileUploadHandler
     {
         private readonly string _savePath;
-        private readonly FileApiHandler _apiHandler;
-       
+        private readonly FileApiService _apiService;
 
-        public FileUploadHandler(string savePath, FileApiHandler apiHandler)
+        public FileUploadHandler(string savePath, FileApiService apiService)
         {
             _savePath = savePath;
-            _apiHandler = apiHandler;
+            _apiService = apiService;
         }
-
-       
 
         public async Task<bool> TryHandle(HttpListenerContext context)
         {   
@@ -33,7 +27,7 @@ namespace HungDuyParkingBridge
                 return false;
 
             var response = context.Response;
-            AddCorsHeaders(response);
+            HttpHelper.AddCorsHeaders(response);
 
             var boundary = GetBoundary(request.ContentType);
             if (string.IsNullOrEmpty(boundary))
@@ -65,9 +59,9 @@ namespace HungDuyParkingBridge
                     using var fs = File.Create(filePath);
                     await section.Body.CopyToAsync(fs);
 
-                    // Register file with API handler
+                    // Register file with API service
                     var fileInfo = new FileInfo(filePath);
-                    _apiHandler.RegisterFile(fileName, fileInfo.Length);
+                    _apiService.RegisterFile(fileName, fileInfo.Length);
                     uploadedFiles.Add(fileName);
                 }
 
@@ -102,13 +96,6 @@ namespace HungDuyParkingBridge
             }
 
             return fileName;
-        }
-
-        private static void AddCorsHeaders(HttpListenerResponse response)
-        {
-            response.AddHeader("Access-Control-Allow-Origin", "*");
-            response.AddHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-            response.AddHeader("Access-Control-Allow-Headers", "*");
         }
 
         private static string? GetBoundary(string? contentType)

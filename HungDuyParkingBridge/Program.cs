@@ -1,3 +1,5 @@
+using HungDuyParkingBridge.UI;
+
 namespace HungDuyParkingBridge
 {
     internal static class Program

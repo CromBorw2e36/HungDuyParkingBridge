@@ -1,4 +1,4 @@
-﻿namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.UI
 {
     partial class Form1
     {

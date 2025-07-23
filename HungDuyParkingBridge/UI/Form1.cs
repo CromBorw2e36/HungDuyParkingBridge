@@ -1,10 +1,12 @@
 ﻿using Microsoft.Win32;
+using HungDuyParkingBridge.Services;
+using System.Text;
+using System.Globalization;
 
-namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.UI
 {
     public partial class Form1 : Form
     {
-
         NotifyIcon trayIcon;
         ContextMenuStrip trayMenu;
         private FileReceiverService _receiver = new();
@@ -12,31 +14,48 @@ namespace HungDuyParkingBridge
         public Form1()
         {
             InitializeComponent();
+            
+            // Set up Vietnamese culture support
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
+            
             this.Load += Form1_Load;
             this.Shown += Form1_Shown;
         }
 
         private void SetupTray()
         {
+            // Ensure proper encoding support for Vietnamese
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
+            
             trayMenu = new ContextMenuStrip();
-            trayMenu.Items.Add("Mở", null, (s, e) => this.Show());
+            
+            // Use Vietnamese text with proper encoding
+            var openItem = new ToolStripMenuItem("Mở cửa sổ");
+            openItem.Click += (s, e) => this.Show();
+            trayMenu.Items.Add(openItem);
 
-            trayMenu.Items.Add("Khởi động lại", null, (s, e) =>
+            var restartItem = new ToolStripMenuItem("Khởi động lại");
+            restartItem.Click += (s, e) =>
             {
                 trayIcon.Visible = false;   
                 trayIcon.Dispose();         
                 Application.Restart();      
                 Application.Exit();         
                 Environment.Exit(0);
-            });
+            };
+            trayMenu.Items.Add(restartItem);
 
-            trayMenu.Items.Add("Thoát", null, (s, e) =>
+            var exitItem = new ToolStripMenuItem("Thoát");
+            exitItem.Click += (s, e) =>
             {
                 trayIcon.Visible = false;  
                 trayIcon.Dispose();        
                 Application.Exit();
                 Environment.Exit(0);
-            });
+            };
+            trayMenu.Items.Add(exitItem);
 
             // Load the custom icon
             Icon customIcon = GetApplicationIcon();
@@ -83,7 +102,7 @@ namespace HungDuyParkingBridge
             catch (Exception ex)
             {
                 // Log error and use default icon
-                System.Diagnostics.Debug.WriteLine($"Error loading custom icon: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Lỗi tải biểu tượng tùy chỉnh: {ex.Message}");
                 return SystemIcons.Application;
             }
         }
@@ -92,7 +111,7 @@ namespace HungDuyParkingBridge
         {
             try
             {
-                string appName = "HungDuyParkingFileReceiver_beta"; // Tên tuỳ ý, dùng để đặt trong Registry
+                string appName = "HungDuyParkingFileReceiver_beta"; // Tên tùy ý, dùng để đặt trong Registry
                 string exePath = Application.ExecutablePath;
 
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -103,7 +122,8 @@ namespace HungDuyParkingBridge
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Không thể thêm vào khởi động cùng Windows:\n" + ex.Message);
+                MessageBox.Show("Không thể thêm vào khởi động cùng Windows:\n" + ex.Message, 
+                    "Lỗi khởi động", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

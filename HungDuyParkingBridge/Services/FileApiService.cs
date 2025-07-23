@@ -1,37 +1,19 @@
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using HungDuyParkingBridge.Models;
+using HungDuyParkingBridge.Utils;
 using SharpCompress.Archives;
 
-namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.Services
 {
-    public class FileMetadata
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public long Size { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ModifiedDate { get; set; }
-        public string MimeType { get; set; } = string.Empty;
-        public bool IsCompressed { get; set; }
-        public string? ParentId { get; set; }
-        public bool IsFolder { get; set; }
-    }
-
-    public class ApiResponse<T>
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public T? Data { get; set; }
-    }
-
-    internal class FileApiHandler
+    internal class FileApiService
     {
         private readonly string _basePath;
         private readonly string _metadataPath;
         private readonly Dictionary<string, FileMetadata> _metadata;
 
-        public FileApiHandler(string basePath)
+        public FileApiService(string basePath)
         {
             _basePath = basePath;
             _metadataPath = Path.Combine(_basePath, "metadata.json");
@@ -44,7 +26,7 @@ namespace HungDuyParkingBridge
             var response = context.Response;
 
             // Add CORS headers
-            AddCorsHeaders(response);
+            HttpHelper.AddCorsHeaders(response);
 
             // Handle OPTIONS preflight
             if (request.HttpMethod == "OPTIONS")
@@ -435,13 +417,6 @@ namespace HungDuyParkingBridge
             response.Close();
         }
 
-        private static void AddCorsHeaders(HttpListenerResponse response)
-        {
-            response.AddHeader("Access-Control-Allow-Origin", "*");
-            response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            response.AddHeader("Access-Control-Allow-Headers", "*");
-        }
-
         private Dictionary<string, FileMetadata> LoadMetadata()
         {
             if (!File.Exists(_metadataPath))
@@ -475,38 +450,14 @@ namespace HungDuyParkingBridge
                 Size = size,
                 CreatedDate = DateTime.Now,
                 ModifiedDate = DateTime.Now,
-                MimeType = GetMimeType(fileName),
-                IsCompressed = IsCompressedFile(fileName),
+                MimeType = MimeTypeHelper.GetMimeType(fileName),
+                IsCompressed = MimeTypeHelper.IsCompressedFile(fileName),
                 ParentId = null,
                 IsFolder = false
             };
 
             _metadata[fileId] = metadata;
             Task.Run(SaveMetadata);
-        }
-
-        private static string GetMimeType(string fileName)
-        {
-            return Path.GetExtension(fileName).ToLowerInvariant() switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                ".pdf" => "application/pdf",
-                ".txt" => "text/plain",
-                ".doc" or ".docx" => "application/msword",
-                ".xls" or ".xlsx" => "application/vnd.ms-excel",
-                ".zip" => "application/zip",
-                ".rar" => "application/x-rar-compressed",
-                ".7z" => "application/x-7z-compressed",
-                _ => "application/octet-stream"
-            };
-        }
-
-        private static bool IsCompressedFile(string fileName)
-        {
-            var ext = Path.GetExtension(fileName).ToLowerInvariant();
-            return ext is ".zip" or ".rar" or ".7z" or ".tar" or ".gz";
         }
     }
 }

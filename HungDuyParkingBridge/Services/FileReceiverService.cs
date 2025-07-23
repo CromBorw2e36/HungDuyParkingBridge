@@ -1,10 +1,9 @@
-﻿using System.Net;
-using System.Text;
+using System.Net;
 using System.Diagnostics;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Net.Http.Headers;
+using HungDuyParkingBridge.Handlers;
+using HungDuyParkingBridge.Services;
 
-namespace HungDuyParkingBridge
+namespace HungDuyParkingBridge.Services
 {
     internal class FileReceiverService
     {
@@ -12,7 +11,7 @@ namespace HungDuyParkingBridge
         private readonly string _savePath = @"C:\HungDuyParkingReceivedFiles";
         private FileUploadHandler _uploadHandler;
         private FileDownloadHandler _downloadHandler;
-        private FileApiHandler _apiHandler;
+        private FileApiService _apiService;
 
         public void Start()
         {
@@ -20,8 +19,8 @@ namespace HungDuyParkingBridge
             _listener.Prefixes.Add("http://localhost:5000/");
             _listener.Start();
 
-            _apiHandler = new FileApiHandler(_savePath);
-            _uploadHandler = new FileUploadHandler(_savePath, _apiHandler);
+            _apiService = new FileApiService(_savePath);
+            _uploadHandler = new FileUploadHandler(_savePath, _apiService);
             _downloadHandler = new FileDownloadHandler(_savePath);
 
             Task.Run(async () =>
@@ -45,8 +44,8 @@ namespace HungDuyParkingBridge
                             continue;
                         }
 
-                        // Try API handler first
-                        if (await _apiHandler.TryHandle(context)) continue;
+                        // Try API service first
+                        if (await _apiService.TryHandle(context)) continue;
                         if (await _uploadHandler.TryHandle(context)) continue;
                         if (await _downloadHandler.TryHandle(context)) continue;
 
