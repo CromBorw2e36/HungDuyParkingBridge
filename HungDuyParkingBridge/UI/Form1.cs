@@ -10,6 +10,7 @@ namespace HungDuyParkingBridge.UI
         NotifyIcon trayIcon;
         ContextMenuStrip trayMenu;
         private FileReceiverService _receiver = new();
+        private FileCleanupService _cleanupService = new();
 
         public Form1()
         {
@@ -21,6 +22,13 @@ namespace HungDuyParkingBridge.UI
             
             this.Load += Form1_Load;
             this.Shown += Form1_Shown;
+            
+            // Initialize UI state
+            UpdateStatus("Đang khởi tạo...");
+            UpdateFileCount();
+            
+            // Start cleanup timer
+            timer1.Start();
         }
 
         private void SetupTray()
@@ -132,6 +140,7 @@ namespace HungDuyParkingBridge.UI
             SetupTray();
             AddToStartup();
             _receiver.Start();
+            UpdateStatus("Đang chạy - Server đã khởi động");
             this.Hide();
         }
 
@@ -150,7 +159,82 @@ namespace HungDuyParkingBridge.UI
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            this.Hide(); // Ẩn khi form đã hiển thị xong
+            if (this.WindowState == FormWindowState.Minimized)
+                this.Hide(); // Ẩn khi form đã hiển thị xong
+        }
+
+        // New UI event handlers
+        private void btnMinimize_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+        }
+
+        private void btnFileManager_Click(object sender, EventArgs e)
+        {
+            var fileManagerForm = new FileManagerForm();
+            fileManagerForm.Show();
+        }
+
+        private void chkAutoDelete_CheckedChanged(object sender, EventArgs e)
+        {
+            _cleanupService.IsEnabled = chkAutoDelete.Checked;
+            _cleanupService.DeleteAfterDays = (int)numDeleteAfterDays.Value;
+            
+            if (chkAutoDelete.Checked)
+            {
+                UpdateStatus($"Tự động xóa file sau {numDeleteAfterDays.Value} ngày - BẬT");
+            }
+            else
+            {
+                UpdateStatus("Tự động xóa file - TẮT");
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            // Update file count every minute
+            UpdateFileCount();
+            
+            // Run cleanup if enabled
+            if (chkAutoDelete.Checked)
+            {
+                _cleanupService.DeleteAfterDays = (int)numDeleteAfterDays.Value;
+                _cleanupService.CleanupOldFiles();
+            }
+        }
+
+        private void UpdateStatus(string status)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => UpdateStatus(status));
+                return;
+            }
+            
+            lblStatus.Text = $"Trạng thái: {status}";
+        }
+
+        private void UpdateFileCount()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(UpdateFileCount);
+                return;
+            }
+
+            try
+            {
+                string savePath = @"C:\HungDuyParkingReceivedFiles";
+                if (Directory.Exists(savePath))
+                {
+                    int fileCount = Directory.GetFiles(savePath, "*", SearchOption.AllDirectories).Length;
+                    lblFileCount.Text = $"Số file: {fileCount}";
+                }
+            }
+            catch
+            {
+                lblFileCount.Text = "Số file: 0";
+            }
         }
     }
 }
