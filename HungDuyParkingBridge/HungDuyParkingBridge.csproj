@@ -42,11 +42,25 @@
     <PackageReference Include="System.Net.WebSockets.WebSocketProtocol" Version="4.5.1" />
   </ItemGroup>
 
-  <!-- UPDATED ICON CONFIGURATION -->
+  <!-- ICON CONFIGURATION -->
   <ItemGroup>
     <!-- Embed the icon as a resource AND copy to output -->
     <EmbeddedResource Include="logoTapDoan.ico" />
     <Content Include="logoTapDoan.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- BACKGROUND IMAGES CONFIGURATION -->
+  <ItemGroup>
+    <!-- Include background image if it exists -->
+    <Content Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\background-home-page.png" Condition="Exists('Images\background-home-page.png')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="background-home-page.png" Condition="Exists('background-home-page.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

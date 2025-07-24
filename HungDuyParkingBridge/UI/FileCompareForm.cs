@@ -58,8 +58,8 @@ namespace HungDuyParkingBridge.UI
 
         private void LoadFileInfo()
         {
-            lblFile1Info.Text = $"File 1: {_file1Info.Name} ({FormatFileSize(_file1Info.Length)}) - {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm}";
-            lblFile2Info.Text = $"File 2: {_file2Info.Name} ({FormatFileSize(_file2Info.Length)}) - {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm}";
+            lblFile1Info.Text = $"Tập tin 1: {_file1Info.Name} ({FormatFileSize(_file1Info.Length)}) - {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm}";
+            lblFile2Info.Text = $"Tập tin 2: {_file2Info.Name} ({FormatFileSize(_file2Info.Length)}) - {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm}";
             
             // Show file size difference
             long sizeDiff = _file2Info.Length - _file1Info.Length;
@@ -175,17 +175,17 @@ namespace HungDuyParkingBridge.UI
 
         private void ShowBasicComparison()
         {
-            txtFile1.Text = $"File: {_file1Info.Name}\n" +
-                           $"Type: {_file1Info.Extension.ToUpperInvariant()}\n" +
-                           $"Size: {FormatFileSize(_file1Info.Length)}\n" +
-                           $"Created: {_file1Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
-                           $"Modified: {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
+            txtFile1.Text = $"Tên: {_file1Info.Name}\n" +
+                           $"Loại: {_file1Info.Extension.ToUpperInvariant()}\n" +
+                           $"Kích thước: {FormatFileSize(_file1Info.Length)}\n" +
+                           $"Ngày tạo: {_file1Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
+                           $"Chỉnh sửa: {_file1Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
                            
-            txtFile2.Text = $"File: {_file2Info.Name}\n" +
-                           $"Type: {_file2Info.Extension.ToUpperInvariant()}\n" +
-                           $"Size: {FormatFileSize(_file2Info.Length)}\n" +
-                           $"Created: {_file2Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
-                           $"Modified: {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
+            txtFile2.Text = $"Tên: {_file2Info.Name}\n" +
+                           $"Loại: {_file2Info.Extension.ToUpperInvariant()}\n" +
+                           $"Kích thước: {FormatFileSize(_file2Info.Length)}\n" +
+                           $"Ngày tạo: {_file2Info.CreationTime:dd/MM/yyyy HH:mm:ss}\n" +
+                           $"Chỉnh sửa: {_file2Info.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
             
             bool sameType = _file1Info.Extension.Equals(_file2Info.Extension, StringComparison.OrdinalIgnoreCase);
             bool sameSize = _file1Info.Length == _file2Info.Length;

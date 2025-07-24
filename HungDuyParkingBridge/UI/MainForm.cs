@@ -1,8 +1,10 @@
 using Microsoft.Win32;
 using HungDuyParkingBridge.Services;
 using HungDuyParkingBridge.Utilities;
+using HungDuyParkingBridge.Utils;
 using System.Text;
 using System.Globalization;
+using System.Drawing.Drawing2D;
 
 namespace HungDuyParkingBridge.UI
 {
@@ -34,6 +36,7 @@ namespace HungDuyParkingBridge.UI
             // Initialize UI state
             UpdateStatus("Initializing...");
             UpdateFileCount();
+            UpdateAuthenticationStatus();
             
             // Start cleanup timer
             timer1.Start();
@@ -49,14 +52,71 @@ namespace HungDuyParkingBridge.UI
                 ImageList = new ImageList()
             };
 
-            // Add tab pages
+            // Add tab pages based on authentication
             AddHomeTab();
-            AddWebSocketTab();
+            if (HDParkingConst.IsAdminAuthenticated)
+            {
+                AddWebSocketTab();
+            }
             AddFileManagerTab();
 
             // Add TabControl to the main panel
             panel2.Controls.Clear();
             panel2.Controls.Add(tabControl);
+        }
+
+        private void UpdateAuthenticationStatus()
+        {
+            if (HDParkingConst.IsAdminAuthenticated)
+            {
+                lblAuthStatus.Text = "| 🔓 Admin Mode";
+                lblAuthStatus.ForeColor = Color.Green;
+                
+                // Show admin menu items
+                openFolderToolStripMenuItem.Visible = true;
+                cleanupNowToolStripMenuItem.Visible = true;
+                restartServerToolStripMenuItem.Visible = true;
+                webSocketTabToolStripMenuItem.Visible = true;
+                
+                // Enable logout
+                logoutToolStripMenuItem.Enabled = true;
+                authenticationToolStripMenuItem.Enabled = false;
+            }
+            else
+            {
+                lblAuthStatus.Text = "| 🔒 Guest Mode";
+                lblAuthStatus.ForeColor = Color.Red;
+                
+                // Hide admin menu items
+                openFolderToolStripMenuItem.Visible = false;
+                cleanupNowToolStripMenuItem.Visible = false;
+                restartServerToolStripMenuItem.Visible = false;
+                webSocketTabToolStripMenuItem.Visible = false;
+                
+                // Enable authentication
+                logoutToolStripMenuItem.Enabled = false;
+                authenticationToolStripMenuItem.Enabled = true;
+            }
+        }
+
+        private void RefreshTabsBasedOnAuth()
+        {
+            // Clear existing tabs
+            tabControl.TabPages.Clear();
+            
+            // Add tabs based on authentication
+            AddHomeTab();
+            if (HDParkingConst.IsAdminAuthenticated)
+            {
+                AddWebSocketTab();
+            }
+            AddFileManagerTab();
+            
+            // Refresh the FileManagerUserControl authentication status
+            if (fileManagerControl != null)
+            {
+                fileManagerControl.RefreshAuthenticationStatus();
+            }
         }
 
         private void AddHomeTab()
@@ -74,72 +134,282 @@ namespace HungDuyParkingBridge.UI
                 Padding = new Padding(20)
             };
 
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                // Show background image for guest mode
+                AddBackgroundImageToPanel(homePanel);
+            }
+            else
+            {
+                // Show admin controls
+                AddAdminControlsToPanel(homePanel);
+            }
+
+            homeTab.Controls.Add(homePanel);
+            tabControl.TabPages.Add(homeTab);
+        }
+
+        private void AddBackgroundImageToPanel(Panel homePanel)
+        {
+            try
+            {
+                // Try to load background image from multiple possible locations
+                string[] possiblePaths = {
+                    Path.Combine(Application.StartupPath, "Publics", "Images", "background-home-page.png"),
+                    Path.Combine(Application.StartupPath, "Images", "background-home-page.png"),
+                    Path.Combine(Application.StartupPath, "background-home-page.png"),
+                    Path.Combine(Directory.GetCurrentDirectory(), "Publics", "Images", "background-home-page.png")
+                };
+
+                string backgroundPath = null;
+                foreach (string path in possiblePaths)
+                {
+                    if (File.Exists(path))
+                    {
+                        backgroundPath = path;
+                        break;
+                    }
+                }
+
+                if (backgroundPath != null)
+                {
+                    // Load and display the actual background image
+                    var backgroundImage = Image.FromFile(backgroundPath);
+                    var pictureBox = new PictureBox
+                    {
+                        Dock = DockStyle.Fill,
+                        Image = backgroundImage,
+                        SizeMode = PictureBoxSizeMode.Zoom, // Better for background images
+                        BackColor = Color.FromArgb(245, 245, 250)
+                    };
+                    homePanel.Controls.Add(pictureBox);
+                }
+                else
+                {
+                    // Create directory and placeholder if background doesn't exist
+                    string defaultPath = Path.Combine(Application.StartupPath, "Publics", "Images", "background-home-page.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(defaultPath));
+                    CreatePlaceholderBackground(defaultPath);
+                    
+                    // Try to load the created placeholder
+                    if (File.Exists(defaultPath))
+                    {
+                        var backgroundImage = Image.FromFile(defaultPath);
+                        var pictureBox = new PictureBox
+                        {
+                            Dock = DockStyle.Fill,
+                            Image = backgroundImage,
+                            SizeMode = PictureBoxSizeMode.Zoom,
+                            BackColor = Color.FromArgb(245, 245, 250)
+                        };
+                        homePanel.Controls.Add(pictureBox);
+                    }
+                    else
+                    {
+                        // Ultimate fallback: Just background color
+                        homePanel.BackColor = Color.FromArgb(245, 245, 250);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error for debugging
+                System.Diagnostics.Debug.WriteLine($"Error loading background image: {ex.Message}");
+                
+                // Fallback: Just background color
+                homePanel.BackColor = Color.FromArgb(245, 245, 250);
+            }
+        }
+
+        private void CreatePlaceholderBackground(string backgroundPath)
+        {
+            try
+            {
+                // Create a professional-looking 1200x800 background image
+                using (var bitmap = new Bitmap(1200, 800))
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    // Enable high-quality rendering
+                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+                    // Create a beautiful gradient background
+                    using (var brush = new LinearGradientBrush(
+                        new Rectangle(0, 0, 1200, 800),
+                        Color.FromArgb(240, 248, 255), // Light blue
+                        Color.FromArgb(230, 240, 250), // Slightly darker blue
+                        LinearGradientMode.Vertical))
+                    {
+                        graphics.FillRectangle(brush, 0, 0, 1200, 800);
+                    }
+
+                    // Add subtle pattern or texture
+                    using (var overlayBrush = new LinearGradientBrush(
+                        new Rectangle(0, 0, 1200, 400),
+                        Color.FromArgb(20, 255, 255, 255), // Very light overlay
+                        Color.FromArgb(5, 255, 255, 255),
+                        LinearGradientMode.Horizontal))
+                    {
+                        graphics.FillRectangle(overlayBrush, 0, 0, 1200, 400);
+                    }
+
+                    // Draw company logo/title area
+                    using (var titleBrush = new SolidBrush(Color.FromArgb(64, 64, 64)))
+                    using (var titleFont = new Font("Segoe UI", 36, FontStyle.Bold))
+                    using (var subtitleFont = new Font("Segoe UI", 18, FontStyle.Regular))
+                    {
+                        var titleText = "HungDuy Parking Bridge";
+                        var subtitleText = "File Management System";
+                        
+                        var titleSize = graphics.MeasureString(titleText, titleFont);
+                        var subtitleSize = graphics.MeasureString(subtitleText, subtitleFont);
+                        
+                        // Center the title
+                        var titleX = (1200 - titleSize.Width) / 2;
+                        var titleY = 280;
+                        var subtitleX = (1200 - subtitleSize.Width) / 2;
+                        var subtitleY = titleY + titleSize.Height + 10;
+                        
+                        graphics.DrawString(titleText, titleFont, titleBrush, titleX, titleY);
+                        graphics.DrawString(subtitleText, subtitleFont, titleBrush, subtitleX, subtitleY);
+                    }
+
+                    // Draw elegant lock icon
+                    using (var lockBrush = new SolidBrush(Color.FromArgb(150, 64, 64, 64)))
+                    using (var lockFont = new Font("Segoe UI", 72))
+                    {
+                        var lockText = "🔒";
+                        var lockSize = graphics.MeasureString(lockText, lockFont);
+                        var lockX = (1200 - lockSize.Width) / 2;
+                        var lockY = 450;
+                        
+                        graphics.DrawString(lockText, lockFont, lockBrush, lockX, lockY);
+                    }
+
+                    // Add decorative elements
+                    using (var decorBrush = new SolidBrush(Color.FromArgb(30, 64, 64, 64)))
+                    {
+                        // Draw some subtle decorative circles
+                        graphics.FillEllipse(decorBrush, 100, 100, 80, 80);
+                        graphics.FillEllipse(decorBrush, 1020, 620, 60, 60);
+                        graphics.FillEllipse(decorBrush, 50, 650, 40, 40);
+                    }
+
+                    bitmap.Save(backgroundPath, System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error creating placeholder background: {ex.Message}");
+            }
+        }
+
+        private void AddGuestWelcomeMessage(Panel homePanel)
+        {
+            // Just set background color, no welcome text
+            homePanel.BackColor = Color.FromArgb(245, 245, 250);
+        }
+
+        private void AddAdminControlsToPanel(Panel homePanel)
+        {
+            var currentY = 20;
+
+            // Authentication Status Panel
+            var authPanel = new GroupBox
+            {
+                Text = "🔐 Authentication Status",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(20, currentY),
+                Size = new Size(700, 60),
+                BackColor = Color.FromArgb(240, 255, 240)
+            };
+
+            var lblAuthInfo = new Label
+            {
+                AutoSize = false,
+                Font = new Font("Segoe UI", 9F),
+                Location = new Point(15, 25),
+                Size = new Size(670, 25),
+                Text = "✅ Admin access granted - All features available",
+                ForeColor = Color.DarkGreen
+            };
+
+            authPanel.Controls.Add(lblAuthInfo);
+            homePanel.Controls.Add(authPanel);
+            currentY += 80;
+
             // Server URLs
             var lblServerUrl = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 30),
+                Location = new Point(20, currentY),
                 Text = "HTTP Server:"
             };
 
             var txtServerUrl = new TextBox
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 27),
+                Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(300, 25),
                 Text = "http://localhost:5000"
             };
 
+            currentY += 40;
+
             var lblWebSocketUrl = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 60),
+                Location = new Point(20, currentY),
                 Text = "WebSocket Server:"
             };
 
             var txtWebSocketUrl = new TextBox
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 57),
+                Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(300, 25),
                 Text = "ws://localhost:5001/ws"
             };
+
+            currentY += 40;
 
             // Files saved location
             var lblFilesSaved = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 100),
+                Location = new Point(20, currentY),
                 Text = "Storage folder:"
             };
 
             var txtFilesSaved = new TextBox
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 97),
+                Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(500, 25),
                 Text = "C:\\HungDuyParkingReceivedFiles"
             };
+
+            currentY += 50;
 
             // Auto delete settings
             var lblAutoDelete = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 140),
+                Location = new Point(20, currentY),
                 Text = "Auto delete after:"
             };
 
             var numDeleteAfterDays = new NumericUpDown
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 137),
+                Location = new Point(150, currentY - 3),
                 Maximum = 365,
                 Minimum = 1,
                 Size = new Size(80, 25),
@@ -150,19 +420,21 @@ namespace HungDuyParkingBridge.UI
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(240, 139),
+                Location = new Point(240, currentY),
                 Text = "days (On/Off)",
                 UseVisualStyleBackColor = true
             };
 
             chkAutoDelete.CheckedChanged += (s, e) => chkAutoDelete_CheckedChanged(s, e, chkAutoDelete, numDeleteAfterDays);
 
+            currentY += 50;
+
             // Statistics panel
             var statsPanel = new GroupBox
             {
                 Text = "📊 Statistics",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(20, 180),
+                Location = new Point(20, currentY),
                 Size = new Size(400, 120)
             };
 
@@ -197,7 +469,7 @@ namespace HungDuyParkingBridge.UI
             {
                 Text = "⚡ Quick Actions",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(450, 180),
+                Location = new Point(450, currentY),
                 Size = new Size(300, 120)
             };
 
@@ -240,7 +512,7 @@ namespace HungDuyParkingBridge.UI
 
             actionsPanel.Controls.AddRange(new Control[] { btnOpenSaveFolder, btnCleanupNow, btnRestartServer });
 
-            // Add all controls to home panel
+            // Add all admin controls to home panel
             homePanel.Controls.AddRange(new Control[] {
                 lblServerUrl, txtServerUrl,
                 lblWebSocketUrl, txtWebSocketUrl,
@@ -248,9 +520,6 @@ namespace HungDuyParkingBridge.UI
                 lblAutoDelete, numDeleteAfterDays, chkAutoDelete,
                 statsPanel, actionsPanel
             });
-
-            homeTab.Controls.Add(homePanel);
-            tabControl.TabPages.Add(homeTab);
         }
 
         private void AddWebSocketTab()
@@ -398,6 +667,36 @@ namespace HungDuyParkingBridge.UI
             tabControl.TabPages.Add(fileManagerTab);
         }
 
+        // Authentication event handlers
+        private void AuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var authDialog = new PrivateKeyDialog())
+            {
+                if (authDialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    UpdateAuthenticationStatus();
+                    RefreshTabsBasedOnAuth();
+                    MessageBox.Show("🎉 Welcome to Admin Mode!\n\nAll administrative features are now available.", 
+                        "Authentication Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        private void LogoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to logout from admin mode?\n\nAdministrative features will be hidden.", 
+                "Confirm Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                HDParkingConst.SetAdminAccess(false);
+                UpdateAuthenticationStatus();
+                RefreshTabsBasedOnAuth();
+                MessageBox.Show("🔒 Logged out successfully.\n\nSwitched to Guest Mode.", 
+                    "Logout Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         private void SetupTray()
         {
             // Ensure proper encoding support for English
@@ -414,6 +713,12 @@ namespace HungDuyParkingBridge.UI
             var restartItem = new ToolStripMenuItem("Khởi động lại");
             restartItem.Click += async (s, e) =>
             {
+                if (!HDParkingConst.IsAdminAuthenticated)
+                {
+                    trayIcon.ShowBalloonTip(3000, "Access Denied", "Admin authentication required", ToolTipIcon.Warning);
+                    return;
+                }
+
                 try
                 {
                     await _receiver.Stop();
@@ -432,7 +737,10 @@ namespace HungDuyParkingBridge.UI
             exitItem.Click += async (s, e) =>
             {
                 // Properly stop services before exiting
-                await _receiver.Stop();
+                if (HDParkingConst.IsAdminAuthenticated)
+                {
+                    await _receiver.Stop();
+                }
                 trayIcon.Visible = false;  
                 trayIcon.Dispose();        
                 Application.Exit();
@@ -445,7 +753,7 @@ namespace HungDuyParkingBridge.UI
 
             trayIcon = new NotifyIcon
             {
-                Text = "Hung Duy Parking FileReceiver Beta - WebSocket Running",
+                Text = "Hung Duy Parking FileReceiver Beta - " + (HDParkingConst.IsAdminAuthenticated ? "Admin Mode" : "Guest Mode"),
                 Icon = customIcon,
                 ContextMenuStrip = trayMenu,
                 Visible = true
@@ -483,8 +791,18 @@ namespace HungDuyParkingBridge.UI
         {
             SetupTray();
             AddToStartup();
-            await _receiver.Start();
-            UpdateStatus("Running - HTTP and WebSocket servers started");
+            
+            // Only start services if authenticated
+            if (HDParkingConst.IsAdminAuthenticated)
+            {
+                await _receiver.Start();
+                UpdateStatus("Running - HTTP and WebSocket servers started");
+            }
+            else
+            {
+                UpdateStatus("Guest mode - Services not started");
+            }
+            
             this.Hide();
         }
 
@@ -503,8 +821,8 @@ namespace HungDuyParkingBridge.UI
             
             // Show notification that service is still running
             trayIcon.ShowBalloonTip(3000, 
-                "HungDuy Parking Bridge", 
-                "Application minimized to tray. WebSocket service continues running in background.", 
+                "Thông báo", 
+                "Ứng dụng đâng chạy nền!", 
                 ToolTipIcon.Info);
         }
 
@@ -522,6 +840,8 @@ namespace HungDuyParkingBridge.UI
 
         private void chkAutoDelete_CheckedChanged(object sender, EventArgs e, CheckBox chkAutoDelete, NumericUpDown numDeleteAfterDays)
         {
+            if (!HDParkingConst.IsAdminAuthenticated) return;
+
             _cleanupService.IsEnabled = chkAutoDelete.Checked;
             _cleanupService.DeleteAfterDays = (int)numDeleteAfterDays.Value;
             
@@ -538,12 +858,15 @@ namespace HungDuyParkingBridge.UI
         private void timer1_Tick(object sender, EventArgs e)
         {
             // Update file count every minute
-            UpdateFileCount();
-            
-            // Run cleanup if enabled
-            if (_cleanupService.IsEnabled)
+            if (HDParkingConst.IsAdminAuthenticated)
             {
-                _cleanupService.CleanupOldFiles();
+                UpdateFileCount();
+                
+                // Run cleanup if enabled
+                if (_cleanupService.IsEnabled)
+                {
+                    _cleanupService.CleanupOldFiles();
+                }
             }
         }
 
@@ -568,6 +891,12 @@ namespace HungDuyParkingBridge.UI
 
             try
             {
+                if (!HDParkingConst.IsAdminAuthenticated)
+                {
+                    lblFileCount.Text = "Files: Access denied";
+                    return;
+                }
+
                 string savePath = @"C:\HungDuyParkingReceivedFiles";
                 if (Directory.Exists(savePath))
                 {
@@ -581,9 +910,16 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
-        // WebSocket test methods
+        // WebSocket test methods - only work if authenticated
         private async Task SendTestMessage(string message)
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 await _receiver.BroadcastMessage($"Test: {message}");
@@ -599,6 +935,13 @@ namespace HungDuyParkingBridge.UI
 
         private async Task SendTestFileNotification()
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 string testFileName = $"test-file-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
@@ -615,6 +958,13 @@ namespace HungDuyParkingBridge.UI
 
         private void OpenWebSocketTestPage()
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 string testPageUrl = "http://localhost:5001/";
@@ -631,9 +981,16 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
-        // Quick action methods
+        // Quick action methods - require authentication
         private void OpenSaveFolder()
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 string savePath = @"C:\HungDuyParkingReceivedFiles";
@@ -656,6 +1013,13 @@ namespace HungDuyParkingBridge.UI
 
         private void CleanupNow()
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 var result = MessageBox.Show("Are you sure you want to cleanup old files now?", 
@@ -678,6 +1042,13 @@ namespace HungDuyParkingBridge.UI
 
         private async void RestartServer()
         {
+            if (!HDParkingConst.IsAdminAuthenticated)
+            {
+                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 var result = MessageBox.Show("Are you sure you want to restart the server?", 
@@ -720,7 +1091,11 @@ namespace HungDuyParkingBridge.UI
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Hung Duy Parking FileReceiver\nVersion: 1.0.2\n\nSupport contact: support@hungduy.com\n\nFeatures:\n- HTTP File Upload/Download\n- WebSocket Real-time Notifications\n- File Management\n- Auto Cleanup\n\n⚠️ WebSocket service runs in background even when window is closed", 
+            string authInfo = HDParkingConst.IsAdminAuthenticated 
+                ? "\n\n🔓 Current Mode: Admin - All features available"
+                : "\n\n🔒 Current Mode: Guest - Use Help > Private Key > Authentication for admin access";
+
+            MessageBox.Show("Hung Duy Parking FileReceiver\nVersion: 1.0.2\n\nSupport contact: support@hungduy.com\n\nFeatures:\n- HTTP File Upload/Download\n- WebSocket Real-time Notifications\n- File Management\n- Auto Cleanup\n- Private Key Authentication" + authInfo, 
                 "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }

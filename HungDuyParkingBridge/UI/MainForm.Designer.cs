@@ -37,6 +37,7 @@ namespace HungDuyParkingBridge.UI
             viewToolStripMenuItem = new ToolStripMenuItem();
             homeTabToolStripMenuItem = new ToolStripMenuItem();
             fileManagerTabToolStripMenuItem = new ToolStripMenuItem();
+            webSocketTabToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
             minimizeToTrayToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
@@ -45,12 +46,17 @@ namespace HungDuyParkingBridge.UI
             toolStripSeparator3 = new ToolStripSeparator();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
+            privateKeyToolStripMenuItem = new ToolStripMenuItem();
+            authenticationToolStripMenuItem = new ToolStripMenuItem();
+            logoutToolStripMenuItem = new ToolStripMenuItem();
+            toolStripSeparator4 = new ToolStripSeparator();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             lblStatus = new ToolStripStatusLabel();
             lblFileCount = new ToolStripStatusLabel();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             lblLastUpdate = new ToolStripStatusLabel();
+            lblAuthStatus = new ToolStripStatusLabel();
             panel1 = new Panel();
             btnMinimize = new Button();
             lblTitle = new Label();
@@ -82,7 +88,7 @@ namespace HungDuyParkingBridge.UI
             openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
             openFolderToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
             openFolderToolStripMenuItem.Size = new Size(195, 22);
-            openFolderToolStripMenuItem.Text = "&Open Folder";
+            openFolderToolStripMenuItem.Text = "&Mở thư mục";
             openFolderToolStripMenuItem.Click += (s, e) => OpenSaveFolder();
             // 
             // toolStripSeparator1
@@ -95,12 +101,12 @@ namespace HungDuyParkingBridge.UI
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             exitToolStripMenuItem.ShortcutKeys = Keys.Alt | Keys.F4;
             exitToolStripMenuItem.Size = new Size(195, 22);
-            exitToolStripMenuItem.Text = "E&xit";
+            exitToolStripMenuItem.Text = "Thoát";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { homeTabToolStripMenuItem, fileManagerTabToolStripMenuItem, toolStripSeparator2, minimizeToTrayToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { homeTabToolStripMenuItem, fileManagerTabToolStripMenuItem, webSocketTabToolStripMenuItem, toolStripSeparator2, minimizeToTrayToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "&View";
@@ -110,7 +116,7 @@ namespace HungDuyParkingBridge.UI
             homeTabToolStripMenuItem.Name = "homeTabToolStripMenuItem";
             homeTabToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.D1;
             homeTabToolStripMenuItem.Size = new Size(220, 22);
-            homeTabToolStripMenuItem.Text = "🏠 &Home";
+            homeTabToolStripMenuItem.Text = "🏠 &Trang chính";
             homeTabToolStripMenuItem.Click += (s, e) => tabControl.SelectedIndex = 0;
             // 
             // fileManagerTabToolStripMenuItem
@@ -118,8 +124,16 @@ namespace HungDuyParkingBridge.UI
             fileManagerTabToolStripMenuItem.Name = "fileManagerTabToolStripMenuItem";
             fileManagerTabToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.D2;
             fileManagerTabToolStripMenuItem.Size = new Size(220, 22);
-            fileManagerTabToolStripMenuItem.Text = "📁 &File Manager";
-            fileManagerTabToolStripMenuItem.Click += (s, e) => tabControl.SelectedIndex = 1;
+            fileManagerTabToolStripMenuItem.Text = "📁 &Quản lí tập tin";
+            fileManagerTabToolStripMenuItem.Click += (s, e) => tabControl.SelectedIndex = 2;
+            // 
+            // webSocketTabToolStripMenuItem
+            // 
+            webSocketTabToolStripMenuItem.Name = "webSocketTabToolStripMenuItem";
+            webSocketTabToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.D3;
+            webSocketTabToolStripMenuItem.Size = new Size(220, 22);
+            webSocketTabToolStripMenuItem.Text = "🔌 &WebSocket";
+            webSocketTabToolStripMenuItem.Click += (s, e) => { if (tabControl.TabCount > 1) tabControl.SelectedIndex = 1; };
             // 
             // toolStripSeparator2
             // 
@@ -131,7 +145,7 @@ namespace HungDuyParkingBridge.UI
             minimizeToTrayToolStripMenuItem.Name = "minimizeToTrayToolStripMenuItem";
             minimizeToTrayToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.M;
             minimizeToTrayToolStripMenuItem.Size = new Size(220, 22);
-            minimizeToTrayToolStripMenuItem.Text = "&Minimize to Tray";
+            minimizeToTrayToolStripMenuItem.Text = "&Ẩn đi";
             minimizeToTrayToolStripMenuItem.Click += btnMinimize_Click;
             // 
             // toolsToolStripMenuItem
@@ -145,14 +159,14 @@ namespace HungDuyParkingBridge.UI
             // 
             cleanupNowToolStripMenuItem.Name = "cleanupNowToolStripMenuItem";
             cleanupNowToolStripMenuItem.Size = new Size(180, 22);
-            cleanupNowToolStripMenuItem.Text = "🗑️ &Cleanup Now";
+            cleanupNowToolStripMenuItem.Text = "🗑️ &Dọn dẹp";
             cleanupNowToolStripMenuItem.Click += (s, e) => CleanupNow();
             // 
             // restartServerToolStripMenuItem
             // 
             restartServerToolStripMenuItem.Name = "restartServerToolStripMenuItem";
             restartServerToolStripMenuItem.Size = new Size(180, 22);
-            restartServerToolStripMenuItem.Text = "🔄 &Restart Server";
+            restartServerToolStripMenuItem.Text = "🔄 &Khởi động lại";
             restartServerToolStripMenuItem.Click += (s, e) => RestartServer();
             // 
             // toolStripSeparator3
@@ -168,21 +182,49 @@ namespace HungDuyParkingBridge.UI
             // 
             // helpToolStripMenuItem
             // 
-            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem });
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { privateKeyToolStripMenuItem, toolStripSeparator4, aboutToolStripMenuItem });
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             helpToolStripMenuItem.Size = new Size(44, 20);
             helpToolStripMenuItem.Text = "&Help";
+            // 
+            // privateKeyToolStripMenuItem
+            // 
+            privateKeyToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { authenticationToolStripMenuItem, logoutToolStripMenuItem });
+            privateKeyToolStripMenuItem.Name = "privateKeyToolStripMenuItem";
+            privateKeyToolStripMenuItem.Size = new Size(152, 22);
+            privateKeyToolStripMenuItem.Text = "🔐 &Private Key";
+            // 
+            // authenticationToolStripMenuItem
+            // 
+            authenticationToolStripMenuItem.Name = "authenticationToolStripMenuItem";
+            authenticationToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.A;
+            authenticationToolStripMenuItem.Size = new Size(250, 22);
+            authenticationToolStripMenuItem.Text = "🔓 &Authentication";
+            authenticationToolStripMenuItem.Click += AuthenticationToolStripMenuItem_Click;
+            // 
+            // logoutToolStripMenuItem
+            // 
+            logoutToolStripMenuItem.Name = "logoutToolStripMenuItem";
+            logoutToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.L;
+            logoutToolStripMenuItem.Size = new Size(250, 22);
+            logoutToolStripMenuItem.Text = "🚪 &Logout";
+            logoutToolStripMenuItem.Click += LogoutToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(149, 6);
             // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             aboutToolStripMenuItem.Size = new Size(152, 22);
-            aboutToolStripMenuItem.Text = "&About...";
+            aboutToolStripMenuItem.Text = "&Giới thiệu";
             aboutToolStripMenuItem.Click += helpToolStripMenuItem_Click;
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatus, toolStripStatusLabel1, lblFileCount, lblLastUpdate });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatus, toolStripStatusLabel1, lblFileCount, lblLastUpdate, lblAuthStatus });
             statusStrip1.Location = new Point(0, 728);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1200, 22);
@@ -215,6 +257,13 @@ namespace HungDuyParkingBridge.UI
             lblLastUpdate.Size = new Size(100, 17);
             lblLastUpdate.Text = "Updated: None";
             // 
+            // lblAuthStatus
+            // 
+            lblAuthStatus.Name = "lblAuthStatus";
+            lblAuthStatus.Size = new Size(100, 17);
+            lblAuthStatus.Text = "| 🔒 Guest Mode";
+            lblAuthStatus.ForeColor = Color.Red;
+            // 
             // panel1
             // 
             panel1.BackColor = Color.FromArgb(64, 64, 64);
@@ -236,7 +285,7 @@ namespace HungDuyParkingBridge.UI
             btnMinimize.Name = "btnMinimize";
             btnMinimize.Size = new Size(100, 30);
             btnMinimize.TabIndex = 1;
-            btnMinimize.Text = "Minimize";
+            btnMinimize.Text = "Ẩn";
             btnMinimize.UseVisualStyleBackColor = false;
             btnMinimize.Click += btnMinimize_Click;
             // 
@@ -249,7 +298,7 @@ namespace HungDuyParkingBridge.UI
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(288, 25);
             lblTitle.TabIndex = 0;
-            lblTitle.Text = "Hung Duy Parking FileReceiver";
+            lblTitle.Text = "Hung Duy Parking Bridge";
             // 
             // panel2
             // 
@@ -277,7 +326,7 @@ namespace HungDuyParkingBridge.UI
             MinimumSize = new Size(1000, 600);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Hung Duy Parking FileReceiver";
+            Text = "Hung Duy Parking Bridge";
             FormClosing += MainForm_FormClosing;
             Resize += MainForm_Resize;
             menuStrip1.ResumeLayout(false);
@@ -300,6 +349,7 @@ namespace HungDuyParkingBridge.UI
         private ToolStripMenuItem viewToolStripMenuItem;
         private ToolStripMenuItem homeTabToolStripMenuItem;
         private ToolStripMenuItem fileManagerTabToolStripMenuItem;
+        private ToolStripMenuItem webSocketTabToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem minimizeToTrayToolStripMenuItem;
         private ToolStripMenuItem toolsToolStripMenuItem;
@@ -308,12 +358,17 @@ namespace HungDuyParkingBridge.UI
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripMenuItem settingsToolStripMenuItem;
         private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem privateKeyToolStripMenuItem;
+        private ToolStripMenuItem authenticationToolStripMenuItem;
+        private ToolStripMenuItem logoutToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator4;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel lblStatus;
         private ToolStripStatusLabel lblFileCount;
         private ToolStripStatusLabel toolStripStatusLabel1;
         private ToolStripStatusLabel lblLastUpdate;
+        private ToolStripStatusLabel lblAuthStatus;
         private Panel panel1;
         private Button btnMinimize;
         private Label lblTitle;

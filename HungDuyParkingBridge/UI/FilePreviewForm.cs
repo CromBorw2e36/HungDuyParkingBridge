@@ -35,11 +35,11 @@ namespace HungDuyParkingBridge.UI
         {
             try
             {
-                lblFileName.Text = $"File name: {_fileInfo.Name}";
-                lblFileSize.Text = $"Size: {FormatFileSize(_fileInfo.Length)}";
-                lblCreatedDate.Text = $"Created: {_fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}";
-                lblModifiedDate.Text = $"Modified: {_fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
-                lblFilePath.Text = $"Path: {_fileInfo.FullName}";
+                lblFileName.Text = $"Tên: {_fileInfo.Name}";
+                lblFileSize.Text = $"Kích thước: {FormatFileSize(_fileInfo.Length)}";
+                lblCreatedDate.Text = $"Ngày tạo: {_fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}";
+                lblModifiedDate.Text = $"Chỉnh sửa: {_fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}";
+                lblFilePath.Text = $"Đường dẫn: {_fileInfo.FullName}";
                 
                 string extension = _fileInfo.Extension.ToLowerInvariant();
                 
@@ -164,13 +164,13 @@ namespace HungDuyParkingBridge.UI
                 pictureBoxPreview.Visible = true;
                 txtPreview.Visible = false;
                 
-                txtPreview.Text = $"Image {img.Width}x{img.Height} pixels\n" +
-                                 $"Format: {img.RawFormat}\n" +
+                txtPreview.Text = $"Hình ảnh {img.Width}x{img.Height} pixels\n" +
+                                 $"Định dạng: {img.RawFormat}\n" +
                                  $"Double-click to view original size";
             }
             catch (Exception ex)
             {
-                txtPreview.Text = $"Cannot load image: {ex.Message}";
+                txtPreview.Text = $"Không thể tải hình ảnh: {ex.Message}";
                 pictureBoxPreview.Visible = false;
                 txtPreview.Visible = true;
             }
@@ -179,8 +179,8 @@ namespace HungDuyParkingBridge.UI
         private void LoadPdfInfo()
         {
             txtPreview.Text = $"PDF File: {_fileInfo.Name}\n" +
-                             $"Size: {FormatFileSize(_fileInfo.Length)}\n\n" +
-                             $"Double-click to open with default application";
+                             $"Kích thước: {FormatFileSize(_fileInfo.Length)}\n\n" +
+                             $"Double-click để mở bằng phần mềm mặt định";
         }
 
         private void LoadArchiveInfo()
@@ -228,18 +228,18 @@ namespace HungDuyParkingBridge.UI
         private void LoadOfficeFileInfo()
         {
             txtPreview.Text = $"Office File: {_fileInfo.Name}\n" +
-                             $"Type: {_fileInfo.Extension.ToUpperInvariant()}\n" +
-                             $"Size: {FormatFileSize(_fileInfo.Length)}\n\n" +
-                             $"Double-click to open with Microsoft Office";
+                             $"Loại: {_fileInfo.Extension.ToUpperInvariant()}\n" +
+                             $"Kích thước: {FormatFileSize(_fileInfo.Length)}\n\n" +
+                             $"Double-click để mở với Microsoft Office";
         }
 
         private void LoadDefaultInfo()
         {
-            txtPreview.Text = $"File: {_fileInfo.Name}\n" +
-                             $"Type: {_fileInfo.Extension.ToUpperInvariant()}\n" +
-                             $"Size: {FormatFileSize(_fileInfo.Length)}\n\n" +
-                             $"No preview available for this file type.\n" +
-                             $"Double-click to open with default application.";
+            txtPreview.Text = $"Tên: {_fileInfo.Name}\n" +
+                             $"Loại: {_fileInfo.Extension.ToUpperInvariant()}\n" +
+                             $"Kích thước: {FormatFileSize(_fileInfo.Length)}\n\n" +
+                             $"Không thể xem trước loại file này.\n" +
+                             $"Double-click để mở với phần mềm mặc định.";
         }
 
         private Size ScaleImageSize(Size original, Size maxSize)
@@ -280,7 +280,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Cannot open file: {ex.Message}", "Error", 
+                MessageBox.Show($"Không thể mở file: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -293,7 +293,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Cannot open folder: {ex.Message}", "Error", 
+                MessageBox.Show($"Không thể mở thư mục: {ex.Message}", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

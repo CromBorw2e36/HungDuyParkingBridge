@@ -69,7 +69,7 @@ namespace HungDuyParkingBridge.UI
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new Size(120, 21);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "File Preview";
+            this.lblTitle.Text = "Xem chi tiết";
             // 
             // panel2
             // 
@@ -93,7 +93,7 @@ namespace HungDuyParkingBridge.UI
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new Size(100, 30);
             this.btnClose.TabIndex = 2;
-            this.btnClose.Text = "Close";
+            this.btnClose.Text = "Đóng";
             this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new EventHandler(this.btnClose_Click);
             // 
@@ -106,7 +106,7 @@ namespace HungDuyParkingBridge.UI
             this.btnOpenFolder.Name = "btnOpenFolder";
             this.btnOpenFolder.Size = new Size(120, 30);
             this.btnOpenFolder.TabIndex = 1;
-            this.btnOpenFolder.Text = "Open Folder";
+            this.btnOpenFolder.Text = "Mở thư mục";
             this.btnOpenFolder.UseVisualStyleBackColor = false;
             this.btnOpenFolder.Click += new EventHandler(this.btnOpenFolder_Click);
             // 
@@ -119,7 +119,7 @@ namespace HungDuyParkingBridge.UI
             this.btnOpenFile.Name = "btnOpenFile";
             this.btnOpenFile.Size = new Size(120, 30);
             this.btnOpenFile.TabIndex = 0;
-            this.btnOpenFile.Text = "Open File";
+            this.btnOpenFile.Text = "Mở tập tin";
             this.btnOpenFile.UseVisualStyleBackColor = false;
             this.btnOpenFile.Click += new EventHandler(this.btnOpenFile_Click);
             // 
@@ -145,7 +145,7 @@ namespace HungDuyParkingBridge.UI
             this.lblFilePath.Name = "lblFilePath";
             this.lblFilePath.Size = new Size(72, 15);
             this.lblFilePath.TabIndex = 4;
-            this.lblFilePath.Text = "Path:";
+            this.lblFilePath.Text = "Đường dẫn:";
             // 
             // lblModifiedDate
             // 
@@ -155,7 +155,7 @@ namespace HungDuyParkingBridge.UI
             this.lblModifiedDate.Name = "lblModifiedDate";
             this.lblModifiedDate.Size = new Size(62, 15);
             this.lblModifiedDate.TabIndex = 3;
-            this.lblModifiedDate.Text = "Modified:";
+            this.lblModifiedDate.Text = "Chính sửa:";
             // 
             // lblCreatedDate
             // 
@@ -165,7 +165,7 @@ namespace HungDuyParkingBridge.UI
             this.lblCreatedDate.Name = "lblCreatedDate";
             this.lblCreatedDate.Size = new Size(61, 15);
             this.lblCreatedDate.TabIndex = 2;
-            this.lblCreatedDate.Text = "Created:";
+            this.lblCreatedDate.Text = "Ngày tạo:";
             // 
             // lblFileSize
             // 
@@ -175,7 +175,7 @@ namespace HungDuyParkingBridge.UI
             this.lblFileSize.Name = "lblFileSize";
             this.lblFileSize.Size = new Size(70, 15);
             this.lblFileSize.TabIndex = 1;
-            this.lblFileSize.Text = "Size:";
+            this.lblFileSize.Text = "Kích thước:";
             // 
             // lblFileName
             // 
@@ -185,7 +185,7 @@ namespace HungDuyParkingBridge.UI
             this.lblFileName.Name = "lblFileName";
             this.lblFileName.Size = new Size(62, 19);
             this.lblFileName.TabIndex = 0;
-            this.lblFileName.Text = "File name:";
+            this.lblFileName.Text = "Tên:";
             // 
             // panel4
             // 
@@ -235,7 +235,7 @@ namespace HungDuyParkingBridge.UI
             this.MinimumSize = new Size(600, 400);
             this.Name = "FilePreviewForm";
             this.StartPosition = FormStartPosition.CenterParent;
-            this.Text = "File Preview - Hung Duy Parking";
+            this.Text = "Xem chi tiết - Hung Duy Parking Bridge";
             this.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
