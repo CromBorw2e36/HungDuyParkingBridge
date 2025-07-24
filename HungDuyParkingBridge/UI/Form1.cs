@@ -1,5 +1,6 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Utilities;
 using System.Text;
 using System.Globalization;
 
@@ -15,6 +16,9 @@ namespace HungDuyParkingBridge.UI
         public Form1()
         {
             InitializeComponent();
+            
+            // Set window icon
+            ResourceHelper.SetWindowIcon(this);
             
             // Set up Vietnamese culture support
             Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
@@ -81,38 +85,7 @@ namespace HungDuyParkingBridge.UI
 
         private Icon GetApplicationIcon()
         {
-            try
-            {
-                // Try to load the icon from the application directory
-                string iconPath = Path.Combine(Application.StartupPath, "logoTapDoan.ico");
-                if (File.Exists(iconPath))
-                {
-                    return new Icon(iconPath);
-                }
-
-                // Try to load from embedded resources
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                var resourceName = assembly.GetManifestResourceNames()
-                    .FirstOrDefault(name => name.EndsWith("logoTapDoan.ico"));
-                
-                if (!string.IsNullOrEmpty(resourceName))
-                {
-                    using var stream = assembly.GetManifestResourceStream(resourceName);
-                    if (stream != null)
-                    {
-                        return new Icon(stream);
-                    }
-                }
-
-                // Fallback to system icon if custom icon is not found
-                return SystemIcons.Application;
-            }
-            catch (Exception ex)
-            {
-                // Log error and use default icon
-                System.Diagnostics.Debug.WriteLine($"Lỗi tải biểu tượng tùy chỉnh: {ex.Message}");
-                return SystemIcons.Application;
-            }
+            return ResourceHelper.GetApplicationIcon();
         }
 
         private void AddToStartup()

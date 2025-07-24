@@ -9,13 +9,28 @@
     <ApplicationIcon>logoTapDoan.ico</ApplicationIcon>
     <FileEncoding>UTF-8</FileEncoding>
     <Utf8Output>true</Utf8Output>
+    
+    <!-- Version Information -->
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <InformationalVersion>1.0.1-beta</InformationalVersion>
+    
+    <!-- Assembly Metadata -->
+    <AssemblyTitle>Hung Duy Parking FileReceiver</AssemblyTitle>
+    <AssemblyDescription>File receiver service for Hung Duy Parking system</AssemblyDescription>
+    <AssemblyCompany>Hung Duy Co., LTD</AssemblyCompany>
+    <AssemblyProduct>Hung Duy Parking Bridge</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2024 Hung Duy Co., LTD</AssemblyCopyright>
+    
+    <!-- Publish Settings -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="logoTapDoan.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.7" />
@@ -23,6 +38,12 @@
     <PackageReference Include="SharpCompress" Version="0.37.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="logoTapDoan.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Utilities;
 using System.Text;
 using System.Globalization;
 
@@ -17,6 +18,9 @@ namespace HungDuyParkingBridge.UI
         public MainForm()
         {
             InitializeComponent();
+            
+            // Set window icon
+            ResourceHelper.SetWindowIcon(this);
             
             // Set up English culture support
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
@@ -254,11 +258,11 @@ namespace HungDuyParkingBridge.UI
             trayMenu = new ContextMenuStrip();
             
             // Use English text
-            var openItem = new ToolStripMenuItem("Open Window");
+            var openItem = new ToolStripMenuItem("Mở cửa sổ");
             openItem.Click += (s, e) => this.Show();
             trayMenu.Items.Add(openItem);
 
-            var restartItem = new ToolStripMenuItem("Restart");
+            var restartItem = new ToolStripMenuItem("Khởi động lại");
             restartItem.Click += (s, e) =>
             {
                 trayIcon.Visible = false;   
@@ -269,7 +273,7 @@ namespace HungDuyParkingBridge.UI
             };
             trayMenu.Items.Add(restartItem);
 
-            var exitItem = new ToolStripMenuItem("Exit");
+            var exitItem = new ToolStripMenuItem("Thoát");
             exitItem.Click += (s, e) =>
             {
                 trayIcon.Visible = false;  
@@ -295,38 +299,7 @@ namespace HungDuyParkingBridge.UI
 
         private Icon GetApplicationIcon()
         {
-            try
-            {
-                // Try to load the icon from the application directory
-                string iconPath = Path.Combine(Application.StartupPath, "logoTapDoan.ico");
-                if (File.Exists(iconPath))
-                {
-                    return new Icon(iconPath);
-                }
-
-                // Try to load from embedded resources
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                var resourceName = assembly.GetManifestResourceNames()
-                    .FirstOrDefault(name => name.EndsWith("logoTapDoan.ico"));
-                
-                if (!string.IsNullOrEmpty(resourceName))
-                {
-                    using var stream = assembly.GetManifestResourceStream(resourceName);
-                    if (stream != null)
-                    {
-                        return new Icon(stream);
-                    }
-                }
-
-                // Fallback to system icon if custom icon is not found
-                return SystemIcons.Application;
-            }
-            catch (Exception ex)
-            {
-                // Log error and use default icon
-                System.Diagnostics.Debug.WriteLine($"L?i t?i bi?u t??ng tùy ch?nh: {ex.Message}");
-                return SystemIcons.Application;
-            }
+            return ResourceHelper.GetApplicationIcon();
         }
 
         private void AddToStartup()

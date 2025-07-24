@@ -1,3 +1,4 @@
+using HungDuyParkingBridge.Utilities;
 using System.Text;
 using System.Globalization;
 using System.Drawing.Imaging;
@@ -13,6 +14,9 @@ namespace HungDuyParkingBridge.UI
         {
             _filePath = filePath;
             _fileInfo = new FileInfo(filePath);
+            
+            // Set window icon
+            ResourceHelper.SetWindowIcon(this);
             
             // Set up English culture and encoding support
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");

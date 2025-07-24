@@ -1,4 +1,5 @@
 using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Utilities;
 using System.Diagnostics;
 using System.Text;
 using System.Globalization;
@@ -18,6 +19,9 @@ namespace HungDuyParkingBridge.UI
 
         public FileManagerForm()
         {
+            // Set window icon
+            ResourceHelper.SetWindowIcon(this);
+            
             // Set up Vietnamese culture and encoding support
             //Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
             //Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
