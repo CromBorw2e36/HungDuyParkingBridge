@@ -19,10 +19,10 @@ namespace HungDuyParkingBridge.UI
         public FileManagerForm()
         {
             // Set up Vietnamese culture and encoding support
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.InputEncoding = Encoding.UTF8;
+            //Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
+            //Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
+            //Console.OutputEncoding = Encoding.UTF8;
+            //Console.InputEncoding = Encoding.UTF8;
             
             InitializeComponent();
             this.Load += FileManagerForm_Load;
@@ -302,12 +302,12 @@ namespace HungDuyParkingBridge.UI
                 var fileInfo = new FileInfo(filePath);
                 
                 // Update bottom info panel with detailed file information
-                lblSelectedFileInfo.Text = $"📂 TÊN FILE\n{fileInfo.Name}\n\n" +
-                                          $"📏 KÍCH THƯỚC\n{FormatFileSize(fileInfo.Length)}\n\n" +
-                                          $"📅 NGÀY TẠO\n{fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}\n\n" +
-                                          $"✏️ NGÀY SỬA\n{fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}\n\n" +
-                                          $"🏷️ LOẠI FILE\n{fileInfo.Extension.ToUpperInvariant()}\n\n" +
-                                          $"📍 ĐƯỜNG DẪN\n{fileInfo.DirectoryName}";
+                lblSelectedFileInfo.Text = $"Tập tin\n{fileInfo.Name}\n\n" +
+                                           $"Kích thước\n{FormatFileSize(fileInfo.Length)}\n\n" +
+                                           $"Ngày tạo\n{fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}\n\n" +
+                                           $"Ngày sửa đổi\n{fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}\n\n" +
+                                           $"Loại file\n{fileInfo.Extension.ToUpperInvariant()}\n\n" +
+                                           $"Đường dẫn\n{fileInfo.DirectoryName}";
 
                 string extension = fileInfo.Extension.ToLowerInvariant();
                 

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using System.Text;
@@ -70,13 +70,13 @@ namespace HungDuyParkingBridge.Handlers
 
             response.StatusCode = 200;
             response.ContentType = "application/json";
-            var responseJson = System.Text.Json.JsonSerializer.Serialize(new 
-            { 
-                success = true, 
-                message = "Files uploaded successfully", 
-                files = uploadedFiles 
-            });
+            var responseJson = System.Text.Json.JsonSerializer.Serialize(new ResponeModel<List<string>>(
+                "OK",
+                "Files uploaded successfully",
+                uploadedFiles
+            ));
             await response.OutputStream.WriteAsync(Encoding.UTF8.GetBytes(responseJson));
+            await response.OutputStream.FlushAsync();
             response.Close();
             return true;
         }

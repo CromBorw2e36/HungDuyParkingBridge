@@ -96,7 +96,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(20, 15),
                 Size = new Size(100, 30),
-                Text = "Refresh",
+                Text = "Làm mới",
                 UseVisualStyleBackColor = false
             };
             btnRefresh.Click += btnRefresh_Click;
@@ -108,7 +108,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(120, 15),
                 Size = new Size(100, 30),
-                Text = "Open Folder",
+                Text = "Mở thư mục",
                 UseVisualStyleBackColor = false
             };
             btnOpenFolder.Click += btnOpenFolder_Click;
@@ -120,7 +120,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(220, 15),
                 Size = new Size(100, 30),
-                Text = "Delete Selected",
+                Text = "Xoá",
                 UseVisualStyleBackColor = false
             };
             btnDeleteSelected.Click += btnDeleteSelected_Click;
@@ -132,7 +132,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(330, 15),
                 Size = new Size(100, 30),
-                Text = "Preview",
+                Text = "Xem trước",
                 UseVisualStyleBackColor = false
             };
             btnPreview.Click += btnPreview_Click;
@@ -144,7 +144,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(440, 15),
                 Size = new Size(100, 30),
-                Text = "Compare",
+                Text = "So sánh",
                 UseVisualStyleBackColor = false
             };
             btnCompare.Click += btnCompare_Click;
@@ -153,7 +153,7 @@ namespace HungDuyParkingBridge.UI
             {
                 AutoSize = true,
                 Location = new Point(550, 21),
-                Text = "Older than:"
+                Text = "Cũ hơn:"
             };
 
             numCleanupDays = new NumericUpDown
@@ -172,7 +172,7 @@ namespace HungDuyParkingBridge.UI
                 ForeColor = Color.White,
                 Location = new Point(685, 15),
                 Size = new Size(100, 30),
-                Text = "Cleanup Old",
+                Text = "Xoá cũ",
                 UseVisualStyleBackColor = false
             };
             btnCleanupOld.Click += btnCleanupOld_Click;
@@ -288,7 +288,7 @@ namespace HungDuyParkingBridge.UI
                 Font = new Font("Consolas", 10F), // Increased font size
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.None,
-                Text = "Select a file to view preview..."
+                Text = "Chọn một tệp để xem trước..."
             };
 
             previewPanel.Controls.Add(pictureBoxPreview);
@@ -307,7 +307,7 @@ namespace HungDuyParkingBridge.UI
             {
                 Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 9F),
-                Text = "Select a file to view detailed information...",
+                Text = "Chọn một tệp để xem thông tin chi tiết...",
                 TextAlign = ContentAlignment.TopLeft,
                 AutoSize = false,
                 BackColor = Color.Transparent
@@ -338,27 +338,27 @@ namespace HungDuyParkingBridge.UI
         {
             var contextMenu = new ContextMenuStrip();
             
-            var previewItem = new ToolStripMenuItem("Preview");
+            var previewItem = new ToolStripMenuItem("Xem trước");
             previewItem.Click += (s, e) => ShowFilePreview();
             contextMenu.Items.Add(previewItem);
             
-            var openItem = new ToolStripMenuItem("Open File");
+            var openItem = new ToolStripMenuItem("Mở tệp");
             openItem.Click += (s, e) => OpenSelectedFile();
             contextMenu.Items.Add(openItem);
             
-            var openFolderItem = new ToolStripMenuItem("Open Containing Folder");
+            var openFolderItem = new ToolStripMenuItem("Mở thư mục chứa");
             openFolderItem.Click += (s, e) => OpenFileLocation();
             contextMenu.Items.Add(openFolderItem);
             
             contextMenu.Items.Add(new ToolStripSeparator());
             
-            var compareItem = new ToolStripMenuItem("Compare with...");
+            var compareItem = new ToolStripMenuItem("So sánh với...");
             compareItem.Click += (s, e) => btnCompare_Click(s, e);
             contextMenu.Items.Add(compareItem);
             
             contextMenu.Items.Add(new ToolStripSeparator());
             
-            var deleteItem = new ToolStripMenuItem("Delete");
+            var deleteItem = new ToolStripMenuItem("Xoá");
             deleteItem.Click += (s, e) => btnDeleteSelected_Click(s, e);
             contextMenu.Items.Add(deleteItem);
             
@@ -413,13 +413,13 @@ namespace HungDuyParkingBridge.UI
                 int fileCount = _cleanupService.GetFileCount();
                 long totalSize = _cleanupService.GetTotalSize();
                 
-                lblFileCount.Text = $"T?ng s? file: {fileCount}";
-                lblTotalSize.Text = $"Dung l??ng: {FormatFileSize(totalSize)}";
+                lblFileCount.Text = $"Tổng số file: {fileCount}";
+                lblTotalSize.Text = $"Dung lượng: {FormatFileSize(totalSize)}";
             }
             catch
             {
-                lblFileCount.Text = "T?ng s? file: 0";
-                lblTotalSize.Text = "Dung l??ng: 0 B";
+                lblFileCount.Text = "Tổng số file: 0";
+                lblTotalSize.Text = "Dung lượng: 0 B";
             }
         }
 
@@ -455,13 +455,13 @@ namespace HungDuyParkingBridge.UI
                 }
                 else
                 {
-                    MessageBox.Show("Th? m?c không t?n t?i!", "Thông báo", 
+                    MessageBox.Show("Thư mục không tồn tại!", "Thông báo", 
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Không th? m? th? m?c: {ex.Message}", "L?i", 
+                MessageBox.Show($"Không thể mở thư mục: {ex.Message}", "Lỗi", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -470,13 +470,13 @@ namespace HungDuyParkingBridge.UI
         {
             if (listViewFiles.SelectedItems.Count == 0)
             {
-                MessageBox.Show("Vui lòng ch?n file ?? xóa!", "Thông báo", 
+                MessageBox.Show("Vui lòng chọn file để xóa!", "Thông báo", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var result = MessageBox.Show($"B?n có ch?c ch?n mu?n xóa {listViewFiles.SelectedItems.Count} file ?ã ch?n?", 
-                "Xác nh?n xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa {listViewFiles.SelectedItems.Count} file đã chọn?", 
+                "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
@@ -494,14 +494,14 @@ namespace HungDuyParkingBridge.UI
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"L?i xóa file {item.Text}: {ex.Message}", "L?i", 
+                        MessageBox.Show($"Lỗi xóa file {item.Text}: {ex.Message}", "Lỗi", 
                             MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 
                 if (deletedCount > 0)
                 {
-                    MessageBox.Show($"?ã xóa thành công {deletedCount} file!", "Thành công", 
+                    MessageBox.Show($"Đã xóa thành công {deletedCount} file!", "Thành công", 
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     RefreshFileList();
                     UpdateStats();
@@ -517,7 +517,7 @@ namespace HungDuyParkingBridge.UI
             }
             else
             {
-                MessageBox.Show("Vui lòng ch?n file ?? xem tr??c!", "Thông báo", 
+                MessageBox.Show("Vui lòng chọn file để xem trước!", "Thông báo", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -526,7 +526,7 @@ namespace HungDuyParkingBridge.UI
         {
             if (listViewFiles.SelectedItems.Count != 2)
             {
-                MessageBox.Show("Vui lòng ch?n ?ứng 2 file ?? so sánh!", "Thông báo", 
+                MessageBox.Show("Vui lòng chọn đúng 2 file để so sánh!", "Thông báo", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -544,15 +544,15 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Không th? so sánh file: {ex.Message}", "L?i", 
+                MessageBox.Show($"Không thể so sánh file: {ex.Message}", "Lỗi", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void btnCleanupOld_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show($"B?n có ch?c ch?n mu?n xóa t?t c? file c? h?n {numCleanupDays.Value} ngày?", 
-                "Xác nh?n d?n d?p", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show($"Bạn có chắc chắn muốn xóa tất cả file cũ hơn {numCleanupDays.Value} ngày?", 
+                "Xác nhận dọn dẹp", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
@@ -560,7 +560,7 @@ namespace HungDuyParkingBridge.UI
                 _cleanupService.DeleteAfterDays = (int)numCleanupDays.Value;
                 _cleanupService.ForceCleanup();
                 
-                MessageBox.Show("?ã hoàn thành d?n d?p file c?!", "Thành công", 
+                MessageBox.Show("Đã hoàn thành dọn dẹp file cũ!", "Thành công", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                 RefreshFileList();
@@ -651,10 +651,10 @@ namespace HungDuyParkingBridge.UI
 
             if (listViewFiles.SelectedItems.Count > 1)
             {
-                lblSelectedFileInfo.Text = $"?? ?ã ch?n {listViewFiles.SelectedItems.Count} file\n\n" +
-                                          $"?? Nhân 'So sánh' ?? so sánh 2 file\n" +
-                                          $"?? Ch?n 1 file ?? xem chi ti?t";
-                txtQuickPreview.Text = "?ã ch?n nhi?u file.\nCh?n 1 file ?? xem preview ho?c 2 file ?? so sánh.";
+                lblSelectedFileInfo.Text = $"Đã chọn {listViewFiles.SelectedItems.Count} file\n\n" +
+                                          $"💡 Nhấn 'So sánh' để so sánh 2 file\n" +
+                                          $"💡 Chọn 1 file để xem chi tiết";
+                txtQuickPreview.Text = "Đã chọn nhiều file.\nChọn 1 file để xem preview hoặc 2 file để so sánh.";
                 pictureBoxPreview.Visible = false;
                 txtQuickPreview.Visible = true;
                 return;
@@ -669,12 +669,12 @@ namespace HungDuyParkingBridge.UI
                 var fileInfo = new FileInfo(filePath);
                 
                 // Update bottom info panel with detailed file information
-                lblSelectedFileInfo.Text = $"?? TÊN FILE\n{fileInfo.Name}\n\n" +
-                                          $"?? KÍCH TH??C\n{FormatFileSize(fileInfo.Length)}\n\n" +
-                                          $"?? NGÀY T?O\n{fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}\n\n" +
-                                          $"?? NGÀY S?A\n{fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}\n\n" +
-                                          $"??? LO?I FILE\n{fileInfo.Extension.ToUpperInvariant()}\n\n" +
-                                          $"?? ???NG D?N\n{fileInfo.DirectoryName}";
+                lblSelectedFileInfo.Text = $"TÊN FILE\n{fileInfo.Name}\n\n" +
+                                          $"KÍCH THƯỚC\n{FormatFileSize(fileInfo.Length)}\n\n" +
+                                          $"NGÀY TẠO\n{fileInfo.CreationTime:dd/MM/yyyy HH:mm:ss}\n\n" +
+                                          $"NGÀY SỬA\n{fileInfo.LastWriteTime:dd/MM/yyyy HH:mm:ss}\n\n" +
+                                          $"LOẠI FILE\n{fileInfo.Extension.ToUpperInvariant()}\n\n" +
+                                          $"ĐƯỜNG DẪN\n{fileInfo.DirectoryName}";
 
                 string extension = fileInfo.Extension.ToLowerInvariant();
                 
@@ -694,8 +694,8 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                lblSelectedFileInfo.Text = $"? L?I\n{ex.Message}";
-                txtQuickPreview.Text = "Không th? t?i preview";
+                lblSelectedFileInfo.Text = $"❌ LỖI\n{ex.Message}";
+                txtQuickPreview.Text = "Không thể tải preview";
                 pictureBoxPreview.Visible = false;
                 txtQuickPreview.Visible = true;
             }
@@ -725,7 +725,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                txtQuickPreview.Text = $"? Không th? t?i ?nh:\n{ex.Message}";
+                txtQuickPreview.Text = $"❌ Không thể tải ảnh:\n{ex.Message}";
                 pictureBoxPreview.Visible = false;
                 txtQuickPreview.Visible = true;
             }
@@ -742,7 +742,7 @@ namespace HungDuyParkingBridge.UI
                 string preview = new string(buffer, 0, charsRead);
                 if (charsRead == 1200)
                 {
-                    preview += "\n\n[...Xem thêm trong 'Xem tr??c'...]";
+                    preview += "\n\n[...Xem thêm trong 'Xem trước'...]";
                 }
                 
                 txtQuickPreview.Text = preview;
@@ -751,7 +751,7 @@ namespace HungDuyParkingBridge.UI
             }
             catch (Exception ex)
             {
-                txtQuickPreview.Text = $"? Không th? ??c file:\n{ex.Message}";
+                txtQuickPreview.Text = $"❌ Không thể đọc file:\n{ex.Message}";
                 pictureBoxPreview.Visible = false;
                 txtQuickPreview.Visible = true;
             }
@@ -759,12 +759,12 @@ namespace HungDuyParkingBridge.UI
 
         private void ShowFileTypePreview(FileInfo fileInfo)
         {
-            txtQuickPreview.Text = $"?? {fileInfo.Extension.ToUpperInvariant()} FILE\n\n" +
+            txtQuickPreview.Text = $"📋 {fileInfo.Extension.ToUpperInvariant()} FILE\n\n" +
                                   $"Tên: {fileInfo.Name}\n" +
-                                  $"Kích th??c: {FormatFileSize(fileInfo.Length)}\n\n" +
-                                  $"?? Không có preview cho lo?i file này.\n" +
-                                  $"?? Nhân 'Xem tr??c' ?? xem chi ti?t.\n" +
-                                  $"?? Double-click ?? m? file.";
+                                  $"Kích thước: {FormatFileSize(fileInfo.Length)}\n\n" +
+                                  $"💡 Không có preview cho loại file này.\n" +
+                                  $"💡 Nhấn 'Xem trước' để xem chi tiết.\n" +
+                                  $"💡 Double-click để mở file.";
             pictureBoxPreview.Visible = false;
             txtQuickPreview.Visible = true;
         }
@@ -852,7 +852,7 @@ namespace HungDuyParkingBridge.UI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Không th? m? file: {ex.Message}", "L?i", 
+                    MessageBox.Show($"❌ Không thể mở file: {ex.Message}", "Lỗi", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -872,7 +872,7 @@ namespace HungDuyParkingBridge.UI
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Không th? m? v? trí file: {ex.Message}", "L?i", 
+                    MessageBox.Show($"❌ Không thể mở vị trí file: {ex.Message}", "Lỗi", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
