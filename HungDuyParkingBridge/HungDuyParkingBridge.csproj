@@ -11,10 +11,10 @@
     <Utf8Output>true</Utf8Output>
     
     <!-- Version Information -->
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <InformationalVersion>1.0.1-beta</InformationalVersion>
+    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <InformationalVersion>1.0.2-beta</InformationalVersion>
     
     <!-- Assembly Metadata -->
     <AssemblyTitle>Hung Duy Parking FileReceiver</AssemblyTitle>
@@ -40,10 +40,13 @@
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
   </ItemGroup>
 
+  <!-- UPDATED ICON CONFIGURATION -->
   <ItemGroup>
-    <None Update="logoTapDoan.ico">
+    <!-- Embed the icon as a resource AND copy to output -->
+    <EmbeddedResource Include="logoTapDoan.ico" />
+    <Content Include="logoTapDoan.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 
 </Project>

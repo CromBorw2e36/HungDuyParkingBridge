@@ -25,32 +25,54 @@ namespace HungDuyParkingBridge
         {
             try
             {
-                Console.WriteLine("=== Icon Loading Test ===");
+                Console.WriteLine("🔍 === ICON LOADING TEST ===");
+                
+                // Run detailed debug
+                ResourceHelper.DebugIconLoading();
                 
                 // List all embedded resources
                 var assembly = Assembly.GetExecutingAssembly();
                 var resources = assembly.GetManifestResourceNames();
                 
-                Console.WriteLine($"Found {resources.Length} embedded resources:");
+                Console.WriteLine($"📦 Found {resources.Length} embedded resources:");
                 foreach (var resource in resources)
                 {
                     Console.WriteLine($"  - {resource}");
+                    if (resource.EndsWith(".ico"))
+                    {
+                        Console.WriteLine($"    ⭐ ICO FILE FOUND: {resource}");
+                    }
                 }
                 
                 // Test icon loading
                 var icon = ResourceHelper.GetApplicationIcon();
-                Console.WriteLine($"Icon loaded successfully: {icon != null}");
+                Console.WriteLine($"🎨 Icon loaded: {(icon != null && icon != SystemIcons.Application ? "✅ SUCCESS" : "❌ FAILED (using default)")}" );
                 
-                if (icon != null)
+                if (icon != null && icon != SystemIcons.Application)
                 {
-                    Console.WriteLine($"Icon size: {icon.Width}x{icon.Height}");
+                    Console.WriteLine($"📏 Icon size: {icon.Width}x{icon.Height}");
                 }
                 
-                Console.WriteLine("=== End Test ===");
+                // Test file system paths
+                Console.WriteLine("\n📁 Checking file system paths:");
+                var paths = new[]
+                {
+                    Path.Combine(Application.StartupPath, "logoTapDoan.ico"),
+                    Path.Combine(AppContext.BaseDirectory, "logoTapDoan.ico"),
+                    Path.Combine(Environment.CurrentDirectory, "logoTapDoan.ico")
+                };
+                
+                foreach (var path in paths)
+                {
+                    var exists = File.Exists(path);
+                    Console.WriteLine($"  {(exists ? "✅" : "❌")} {path}");
+                }
+                
+                Console.WriteLine("=== END TEST ===\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Icon test error: {ex.Message}");
+                Console.WriteLine($"❌ Icon test error: {ex.Message}");
             }
         }
     }

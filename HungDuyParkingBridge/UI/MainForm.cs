@@ -19,8 +19,8 @@ namespace HungDuyParkingBridge.UI
         {
             InitializeComponent();
             
-            // Set window icon
-            ResourceHelper.SetWindowIcon(this);
+            // Force reload icon (important after icon update)
+            ResourceHelper.SetWindowIcon(this, forceReload: true);
             
             // Set up English culture support
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
