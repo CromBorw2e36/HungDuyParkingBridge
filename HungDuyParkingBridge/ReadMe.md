@@ -159,17 +159,28 @@ curl http://localhost:5000/api/ping
 
 ## 🔌 WebSocket Real-time Communication (NEW v1.0.2)
 
-### Native WebSocket Implementation:
+### ⚠️ **IMPORTANT: Background Service Behavior**
+
+**WebSocket service chạy hoàn toàn trong background!**
+
+- ✅ **Continues running khi close main window**
+- ✅ **Runs in system tray independently** 
+- ✅ **Only stops when explicitly exit from tray menu**
+- ✅ **Restart from tray menu keeps service running**
+
+### 🚀 Native WebSocket Implementation:
 
 HungDuy Parking Bridge hiện hỗ trợ **WebSocket real-time communication** cho việc thông báo file upload/download và trạng thái server.
 
 #### **🚀 WebSocket Features:**
 - ✅ **Native WebSocket**: Sử dụng System.Net.WebSockets của .NET 9
+- ✅ **Background Service**: Chạy độc lập trong background
 - ✅ **Real-time notifications**: File upload/download events
 - ✅ **Bi-directional communication**: Client ↔ Server messaging
 - ✅ **Multiple clients**: Hỗ trợ nhiều client kết nối đồng thời
 - ✅ **JSON messaging**: Structured message protocol
 - ✅ **Auto-reconnection**: Client tự động kết nối lại
+- ✅ **System tray integration**: Control via tray menu
 
 #### **📡 Available Endpoints:**
 
@@ -217,17 +228,6 @@ HungDuy Parking Bridge hiện hỗ trợ **WebSocket real-time communication** c
 // Server status
 {
   "type": "status",
-  "server": "HungDuyParkingBridge",
-  "version": "1.0.2", 
-  "connectedClients": 3,
-  "timestamp": "2024-01-01T12:00:00.000Z"
-}
-
-// Pong response
-{
-  "type": "pong",
-  "timestamp": "2024-01-01T12:00:00.000Z"
-}
 #### **🧪 Testing WebSocket:**
 
 **1. PowerShell Test Script:**.\test-websocket.ps1
@@ -271,6 +271,7 @@ Trong MainForm có tab **"🔌 WebSocket"** với:
 - ✅ **Test controls**: Send test messages và notifications
 - ✅ **Client count**: Số lượng client đang kết nối
 - ✅ **Real-time logging**: Debug WebSocket events
+- ✅ **Background service info**: Cảnh báo service chạy background
 
 #### **🛠️ Development Usage:**
 
@@ -291,6 +292,18 @@ curl http://localhost:5001/status
 
 # Trigger test notification
 curl -X POST http://localhost:5001/test
+#### **🎮 System Tray Control:**
+
+**Available Actions:**
+- **Mở cửa sổ**: Show main window
+- **Khởi động lại**: Restart both HTTP and WebSocket services
+- **Thoát**: Stop all services and exit application
+
+**Tray Icon Status:**
+- Icon shows when service is running
+- Tooltip: "Hung Duy Parking FileReceiver Beta - WebSocket Running"
+- Balloon notifications when minimized to tray
+
 #### **🚨 Troubleshooting WebSocket:**
 
 **Connection Issues:**
@@ -299,11 +312,27 @@ curl -X POST http://localhost:5001/test
 3. **Browser**: Modern browsers support WebSocket
 4. **CORS**: WebSocket server has CORS enabled
 
+**Service Management:**
+1. **Background running**: Service continues when window closed
+2. **Full stop**: Only via "Thoát" in tray menu
+3. **Restart**: Use tray menu "Khởi động lại"
+4. **Status check**: Use `.\test-websocket.ps1`
+
 **Testing Steps:**
 1. **Start Application**: Run HungDuyParkingBridge
-2. **Check Status**: `.\test-websocket.ps1`
-3. **Open Test Page**: `http://localhost:5001/`
-4. **Upload File**: Test thông báo real-time
+2. **Close Window**: Service continues in background
+3. **Check Status**: `.\test-websocket.ps1`
+4. **Open Test Page**: `http://localhost:5001/`
+5. **Upload File**: Test thông báo real-time
+6. **Full Exit**: Use tray menu "Thoát"
+
+#### **⚠️ Important Behavior Notes:**
+
+1. **Window close ≠ Service stop**: Closing window chỉ hide UI, service vẫn chạy
+2. **Background notifications**: Tray shows balloon tip khi minimize
+3. **Complete shutdown**: Chỉ "Thoát" từ tray menu mới stop service
+4. **Restart safety**: Tray restart safely stops và starts lại services
+5. **Multiple instances**: Tránh chạy multiple instances cùng lúc
 
 ### 🎯 Use Cases:
 
@@ -312,3 +341,5 @@ curl -X POST http://localhost:5001/test
 - **🌐 Web Dashboard**: Real-time monitoring
 - **📊 Analytics**: Live file transfer metrics
 - **🔔 Notifications**: Instant upload/download alerts
+- **🚀 Background Services**: Always-on file monitoring
+- **⚡ Server Monitoring**: Continuous uptime tracking

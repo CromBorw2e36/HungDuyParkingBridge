@@ -51,6 +51,7 @@ namespace HungDuyParkingBridge.UI
 
             // Add tab pages
             AddHomeTab();
+            AddWebSocketTab();
             AddFileManagerTab();
 
             // Add TabControl to the main panel
@@ -73,13 +74,13 @@ namespace HungDuyParkingBridge.UI
                 Padding = new Padding(20)
             };
 
-            // Server URL
+            // Server URLs
             var lblServerUrl = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
                 Location = new Point(20, 30),
-                Text = "Server URL:"
+                Text = "HTTP Server:"
             };
 
             var txtServerUrl = new TextBox
@@ -91,19 +92,36 @@ namespace HungDuyParkingBridge.UI
                 Text = "http://localhost:5000"
             };
 
+            var lblWebSocketUrl = new Label
+            {
+                AutoSize = true,
+                Font = new Font("Segoe UI", 10F),
+                Location = new Point(20, 60),
+                Text = "WebSocket Server:"
+            };
+
+            var txtWebSocketUrl = new TextBox
+            {
+                Font = new Font("Segoe UI", 10F),
+                Location = new Point(150, 57),
+                ReadOnly = true,
+                Size = new Size(300, 25),
+                Text = "ws://localhost:5001/ws"
+            };
+
             // Files saved location
             var lblFilesSaved = new Label
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 70),
+                Location = new Point(20, 100),
                 Text = "Storage folder:"
             };
 
             var txtFilesSaved = new TextBox
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 67),
+                Location = new Point(150, 97),
                 ReadOnly = true,
                 Size = new Size(500, 25),
                 Text = "C:\\HungDuyParkingReceivedFiles"
@@ -114,14 +132,14 @@ namespace HungDuyParkingBridge.UI
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(20, 110),
+                Location = new Point(20, 140),
                 Text = "Auto delete after:"
             };
 
             var numDeleteAfterDays = new NumericUpDown
             {
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(150, 107),
+                Location = new Point(150, 137),
                 Maximum = 365,
                 Minimum = 1,
                 Size = new Size(80, 25),
@@ -132,7 +150,7 @@ namespace HungDuyParkingBridge.UI
             {
                 AutoSize = true,
                 Font = new Font("Segoe UI", 10F),
-                Location = new Point(240, 109),
+                Location = new Point(240, 139),
                 Text = "days (On/Off)",
                 UseVisualStyleBackColor = true
             };
@@ -144,7 +162,7 @@ namespace HungDuyParkingBridge.UI
             {
                 Text = "📊 Statistics",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(20, 150),
+                Location = new Point(20, 180),
                 Size = new Size(400, 120)
             };
 
@@ -179,7 +197,7 @@ namespace HungDuyParkingBridge.UI
             {
                 Text = "⚡ Quick Actions",
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(450, 150),
+                Location = new Point(450, 180),
                 Size = new Size(300, 120)
             };
 
@@ -225,6 +243,7 @@ namespace HungDuyParkingBridge.UI
             // Add all controls to home panel
             homePanel.Controls.AddRange(new Control[] {
                 lblServerUrl, txtServerUrl,
+                lblWebSocketUrl, txtWebSocketUrl,
                 lblFilesSaved, txtFilesSaved,
                 lblAutoDelete, numDeleteAfterDays, chkAutoDelete,
                 statsPanel, actionsPanel
@@ -232,6 +251,136 @@ namespace HungDuyParkingBridge.UI
 
             homeTab.Controls.Add(homePanel);
             tabControl.TabPages.Add(homeTab);
+        }
+
+        private void AddWebSocketTab()
+        {
+            var webSocketTab = new TabPage("🔌 WebSocket")
+            {
+                UseVisualStyleBackColor = true,
+                Padding = new Padding(20)
+            };
+
+            var webSocketPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20)
+            };
+
+            // WebSocket status
+            var lblWebSocketStatus = new Label
+            {
+                AutoSize = true,
+                Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+                Location = new Point(20, 20),
+                Text = "🔌 WebSocket Real-time Communication"
+            };
+
+            var lblConnectionInfo = new Label
+            {
+                AutoSize = false,
+                Font = new Font("Segoe UI", 10F),
+                Location = new Point(20, 60),
+                Size = new Size(600, 100),
+                Text = "WebSocket Server: ws://localhost:5001/ws\n" +
+                       "Status: Running in background\n" +
+                       "Real-time notifications for file uploads, downloads, and server events\n" +
+                       "⚠️ WebSocket continues running even when window is closed"
+            };
+
+            // Test panel
+            var testPanel = new GroupBox
+            {
+                Text = "🧪 Test WebSocket",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(20, 180),
+                Size = new Size(400, 150)
+            };
+
+            var txtTestMessage = new TextBox
+            {
+                Font = new Font("Segoe UI", 9F),
+                Location = new Point(15, 30),
+                Size = new Size(250, 25),
+                Text = "Test message from server"
+            };
+
+            var btnSendTestMessage = new Button
+            {
+                BackColor = Color.FromArgb(40, 167, 69),
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.White,
+                Location = new Point(280, 28),
+                Size = new Size(100, 30),
+                Text = "📡 Send Test",
+                UseVisualStyleBackColor = false
+            };
+
+            btnSendTestMessage.Click += async (s, e) => await SendTestMessage(txtTestMessage.Text);
+
+            var btnSendTestNotification = new Button
+            {
+                BackColor = Color.FromArgb(0, 123, 255),
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.White,
+                Location = new Point(15, 70),
+                Size = new Size(150, 35),
+                Text = "📁 Test File Upload",
+                UseVisualStyleBackColor = false
+            };
+
+            btnSendTestNotification.Click += async (s, e) => await SendTestFileNotification();
+
+            var btnOpenTestPage = new Button
+            {
+                BackColor = Color.FromArgb(108, 117, 125),
+                FlatStyle = FlatStyle.Flat,
+                ForeColor = Color.White,
+                Location = new Point(180, 70),
+                Size = new Size(150, 35),
+                Text = "🌐 Open Test Page",
+                UseVisualStyleBackColor = false
+            };
+
+            btnOpenTestPage.Click += (s, e) => OpenWebSocketTestPage();
+
+            testPanel.Controls.AddRange(new Control[] { txtTestMessage, btnSendTestMessage, btnSendTestNotification, btnOpenTestPage });
+
+            // Info panel
+            var infoPanel = new GroupBox
+            {
+                Text = "ℹ️ Background Service Info",
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Location = new Point(450, 180),
+                Size = new Size(300, 200)
+            };
+
+            var lblEvents = new Label
+            {
+                AutoSize = false,
+                Font = new Font("Segoe UI", 9F),
+                Location = new Point(15, 30),
+                Size = new Size(270, 150),
+                Text = "✅ WebSocket runs in background\n" +
+                       "✅ Continues when window closed\n" +
+                       "✅ Real-time file notifications\n" +
+                       "✅ Multi-client support\n\n" +
+                       "Available Events:\n" +
+                       "• FileNotification\n" +
+                       "• ServerStatus\n" +
+                       "• UserConnected/Disconnected\n" +
+                       "• Broadcast messages\n\n" +
+                       "To fully stop: Exit from tray menu"
+            };
+
+            infoPanel.Controls.Add(lblEvents);
+
+            webSocketPanel.Controls.AddRange(new Control[] {
+                lblWebSocketStatus, lblConnectionInfo, testPanel, infoPanel
+            });
+
+            webSocketTab.Controls.Add(webSocketPanel);
+            tabControl.TabPages.Add(webSocketTab);
         }
 
         private void AddFileManagerTab()
@@ -263,19 +412,27 @@ namespace HungDuyParkingBridge.UI
             trayMenu.Items.Add(openItem);
 
             var restartItem = new ToolStripMenuItem("Khởi động lại");
-            restartItem.Click += (s, e) =>
+            restartItem.Click += async (s, e) =>
             {
-                trayIcon.Visible = false;   
-                trayIcon.Dispose();         
-                Application.Restart();      
-                Application.Exit();         
-                Environment.Exit(0);
+                try
+                {
+                    await _receiver.Stop();
+                    await Task.Delay(1000);
+                    await _receiver.Start();
+                    trayIcon.ShowBalloonTip(3000, "HungDuy Parking", "Server restarted successfully", ToolTipIcon.Info);
+                }
+                catch (Exception ex)
+                {
+                    trayIcon.ShowBalloonTip(5000, "Error", $"Restart failed: {ex.Message}", ToolTipIcon.Error);
+                }
             };
             trayMenu.Items.Add(restartItem);
 
             var exitItem = new ToolStripMenuItem("Thoát");
-            exitItem.Click += (s, e) =>
+            exitItem.Click += async (s, e) =>
             {
+                // Properly stop services before exiting
+                await _receiver.Stop();
                 trayIcon.Visible = false;  
                 trayIcon.Dispose();        
                 Application.Exit();
@@ -288,7 +445,7 @@ namespace HungDuyParkingBridge.UI
 
             trayIcon = new NotifyIcon
             {
-                Text = "Hung Duy Parking FileReceiver Beta",
+                Text = "Hung Duy Parking FileReceiver Beta - WebSocket Running",
                 Icon = customIcon,
                 ContextMenuStrip = trayMenu,
                 Visible = true
@@ -322,12 +479,12 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
             SetupTray();
             AddToStartup();
-            _receiver.Start();
-            UpdateStatus("Running - Server started");
+            await _receiver.Start();
+            UpdateStatus("Running - HTTP and WebSocket servers started");
             this.Hide();
         }
 
@@ -339,9 +496,16 @@ namespace HungDuyParkingBridge.UI
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            _receiver.Stop();
+            // DON'T stop the receiver service - keep it running in background
+            // Only hide the form to system tray
             e.Cancel = true;
             this.Hide();
+            
+            // Show notification that service is still running
+            trayIcon.ShowBalloonTip(3000, 
+                "HungDuy Parking Bridge", 
+                "Application minimized to tray. WebSocket service continues running in background.", 
+                ToolTipIcon.Info);
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -417,6 +581,56 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
+        // WebSocket test methods
+        private async Task SendTestMessage(string message)
+        {
+            try
+            {
+                await _receiver.BroadcastMessage($"Test: {message}");
+                MessageBox.Show("Test message sent via WebSocket!", "Success", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error sending test message: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task SendTestFileNotification()
+        {
+            try
+            {
+                string testFileName = $"test-file-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
+                await _receiver.NotifyFileUploaded(testFileName, 1024);
+                MessageBox.Show($"Test file notification sent: {testFileName}", "Success", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error sending test notification: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void OpenWebSocketTestPage()
+        {
+            try
+            {
+                string testPageUrl = "http://localhost:5001/";
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = testPageUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Cannot open test page: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // Quick action methods
         private void OpenSaveFolder()
         {
@@ -471,14 +685,14 @@ namespace HungDuyParkingBridge.UI
 
                 if (result == DialogResult.Yes)
                 {
-                    _receiver.Stop();
+                    await _receiver.Stop();
                     UpdateStatus("Restarting server...");
                     
                     // Small delay before restart
                     await Task.Delay(1000);
                     
-                    _receiver.Start();
-                    UpdateStatus("Server restarted successfully");
+                    await _receiver.Start();
+                    UpdateStatus("Servers restarted successfully");
                 }
             }
             catch (Exception ex)
@@ -506,7 +720,7 @@ namespace HungDuyParkingBridge.UI
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Hung Duy Parking FileReceiver\nVersion: 1.0\n\nSupport contact: support@hungduy.com", 
+            MessageBox.Show("Hung Duy Parking FileReceiver\nVersion: 1.0.2\n\nSupport contact: support@hungduy.com\n\nFeatures:\n- HTTP File Upload/Download\n- WebSocket Real-time Notifications\n- File Management\n- Auto Cleanup\n\n⚠️ WebSocket service runs in background even when window is closed", 
                 "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
