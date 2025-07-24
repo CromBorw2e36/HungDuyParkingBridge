@@ -1,15 +1,22 @@
-﻿using System.Net;
+using System.Net;
 using HungDuyParkingBridge.Utils;
+using HungDuyParkingBridge.Services;
 
 namespace HungDuyParkingBridge.Handlers
 {
     internal class FileDownloadHandler
     {
         private readonly string _savePath;
+        private WebSocketService? _webSocketService;
 
         public FileDownloadHandler(string savePath)
         {
             _savePath = savePath;
+        }
+
+        public void SetWebSocketService(WebSocketService webSocketService)
+        {
+            _webSocketService = webSocketService;
         }
 
         public async Task<bool> TryHandle(HttpListenerContext context)
@@ -39,6 +46,13 @@ namespace HungDuyParkingBridge.Handlers
             response.ContentLength64 = fileBytes.Length;
             await response.OutputStream.WriteAsync(fileBytes);
             response.Close();
+
+            // Send WebSocket notification for download
+            if (_webSocketService != null)
+            {
+                await _webSocketService.BroadcastFileNotificationAsync(fileName, "downloaded", fileBytes.Length);
+            }
+
             return true;
         }
     }

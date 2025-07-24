@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HungDuy Parking Bridge - WebSocket Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-entry.file-notification {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .log-entry.server-message {
+            color: #28a745;
+        }
+        .log-entry.user-event {
+            color: #6f42c1;
+        }
+        .log-entry.error {
+            color: #dc3545;
+        }
+        .timestamp {
+            color: #6c757d;
+            font-size: 10px;
+        }
+        .endpoints {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 HungDuy Parking Bridge - WebSocket Test Client</h1>
+        
+        <div class="endpoints">
+            <h3>📡 Available Endpoints:</h3>
+            <ul>
+                <li><strong>WebSocket:</strong> ws://localhost:5001/ws</li>
+                <li><strong>HTTP API:</strong> http://localhost:5000/api/status</li>
+                <li><strong>WebSocket Status:</strong> http://localhost:5001/status</li>
+                <li><strong>Test Notification:</strong> http://localhost:5001/test</li>
+            </ul>
+        </div>
+        
+        <div id="status" class="status disconnected">
+            Status: Disconnected
+        </div>
+
+        <div class="controls">
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <button onclick="sendPing()">Ping</button>
+            <button onclick="requestStatus()">Server Status</button>
+            <button onclick="testFileNotification()">Test File Upload</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="messageInput" placeholder="Enter test message..." value="Hello from WebSocket client!">
+            <button onclick="sendMessage()">Send Message</button>
+        </div>
+
+        <div class="controls">
+            <button onclick="checkHttpApi()">Check HTTP API</button>
+            <button onclick="checkWebSocketStatus()">Check WS Status</button>
+        </div>
+
+        <h3>📋 Event Log</h3>
+        <div id="log" class="log">
+            <div class="log-entry">Ready to connect to WebSocket server...</div>
+        </div>
+    </div>
+    
+    <script>
+        let ws = null;
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+
+        function addLogEntry(message, type = '') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateStatus(isConnected, message = '') {
+            if (isConnected) {
+                status.className = 'status connected';
+                status.textContent = `Status: Connected ${message}`;
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+            } else {
+                status.className = 'status disconnected';
+                status.textContent = `Status: Disconnected ${message}`;
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        function connect() {
+            if (ws) return;
+            
+            try {
+                ws = new WebSocket('ws://localhost:5001/ws');
+                
+                ws.onopen = function() {
+                    updateStatus(true);
+                    addLogEntry('✅ Connected to WebSocket server', 'server-message');
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        switch(data.type) {
+                            case 'connected':
+                                addLogEntry(`🎉 ${data.message} (${data.server})`, 'server-message');
+                                break;
+                            case 'fileNotification':
+                                addLogEntry(`📁 File ${data.action}: ${data.fileName} (${data.fileSize} bytes)`, 'file-notification');
+                                break;
+                            case 'message':
+                                addLogEntry(`💬 ${data.sender}: ${data.content}`, 'server-message');
+                                break;
+                            case 'status':
+                                addLogEntry(`🖥️ Server: ${data.server} v${data.version}, Clients: ${data.connectedClients}`, 'server-message');
+                                break;
+                            case 'pong':
+                                addLogEntry(`🏓 Pong received`, 'server-message');
+                                break;
+                            default:
+                                addLogEntry(`📨 ${JSON.stringify(data)}`, 'server-message');
+                        }
+                    } catch (e) {
+                        addLogEntry(`📨 Raw message: ${event.data}`, 'server-message');
+                    }
+                };
+
+                ws.onclose = function() {
+                    updateStatus(false);
+                    addLogEntry('❌ Connection closed', 'error');
+                    ws = null;
+                };
+
+                ws.onerror = function(error) {
+                    addLogEntry(`❌ WebSocket error: ${error}`, 'error');
+                };
+                
+            } catch (error) {
+                addLogEntry(`❌ Connection failed: ${error}`, 'error');
+                updateStatus(false);
+            }
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function sendPing() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }));
+                addLogEntry('🏓 Ping sent', 'user-event');
+            } else {
+                addLogEntry('❌ Not connected', 'error');
+            }
+        }
+
+        function requestStatus() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'status' }));
+                addLogEntry('📊 Status requested', 'user-event');
+            } else {
+                addLogEntry('❌ Not connected', 'error');
+            }
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'message', content: message }));
+                addLogEntry(`📤 Sent: ${message}`, 'user-event');
+                messageInput.value = '';
+            } else if (!message) {
+                addLogEntry('❌ Enter a message first', 'error');
+            } else {
+                addLogEntry('❌ Not connected', 'error');
+            }
+        }
+
+        function testFileNotification() {
+            fetch('http://localhost:5001/test', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    addLogEntry(`🧪 Test notification triggered: ${data.message}`, 'user-event');
+                })
+                .catch(error => {
+                    addLogEntry(`❌ Test request failed: ${error}`, 'error');
+                });
+        }
+
+        function checkHttpApi() {
+            fetch('http://localhost:5000/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    addLogEntry(`🌐 HTTP API: ${data.Message || 'OK'} (v${data.Data?.version || 'unknown'})`, 'server-message');
+                })
+                .catch(error => {
+                    addLogEntry(`❌ HTTP API check failed: ${error}`, 'error');
+                });
+        }
+
+        function checkWebSocketStatus() {
+            fetch('http://localhost:5001/status')
+                .then(response => response.json())
+                .then(data => {
+                    addLogEntry(`🔌 WS Status: ${data.status} (${data.connectedClients} clients)`, 'server-message');
+                })
+                .catch(error => {
+                    addLogEntry(`❌ WS status check failed: ${error}`, 'error');
+                });
+        }
+
+        function clearLog() {
+            log.innerHTML = '<div class="log-entry">Log cleared...</div>';
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            addLogEntry('🌐 WebSocket Test Client loaded. Click Connect to start.', 'server-message');
+            setTimeout(() => {
+                addLogEntry('💡 Tip: The server should be running on ports 5000 (HTTP) and 5001 (WebSocket)', 'server-message');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

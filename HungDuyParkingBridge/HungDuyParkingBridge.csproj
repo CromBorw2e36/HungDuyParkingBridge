@@ -38,6 +38,8 @@
     <PackageReference Include="SharpCompress" Version="0.37.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <!-- WebSocket support -->
+    <PackageReference Include="System.Net.WebSockets.WebSocketProtocol" Version="4.5.1" />
   </ItemGroup>
 
   <!-- UPDATED ICON CONFIGURATION -->

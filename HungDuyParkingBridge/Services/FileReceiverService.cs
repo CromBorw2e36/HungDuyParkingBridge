@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Diagnostics;
 using HungDuyParkingBridge.Handlers;
 using HungDuyParkingBridge.Services;
@@ -12,8 +12,9 @@ namespace HungDuyParkingBridge.Services
         private FileUploadHandler _uploadHandler;
         private FileDownloadHandler _downloadHandler;
         private FileApiService _apiService;
+        private WebSocketService _webSocketService;
 
-        public void Start()
+        public async Task Start()
         {
             Directory.CreateDirectory(_savePath);
             _listener.Prefixes.Add("http://localhost:5000/");
@@ -22,6 +23,14 @@ namespace HungDuyParkingBridge.Services
             _apiService = new FileApiService(_savePath);
             _uploadHandler = new FileUploadHandler(_savePath, _apiService);
             _downloadHandler = new FileDownloadHandler(_savePath);
+            
+            // Start WebSocket service on port 5001
+            _webSocketService = new WebSocketService("http://localhost:5001/");
+            await _webSocketService.StartAsync();
+
+            // Pass WebSocket service to handlers for notifications
+            _uploadHandler.SetWebSocketService(_webSocketService);
+            _downloadHandler.SetWebSocketService(_webSocketService);
 
             Task.Run(async () =>
             {
@@ -59,8 +68,42 @@ namespace HungDuyParkingBridge.Services
                     Debug.WriteLine("[HttpListener Error] " + ex.Message);
                 }
             });
+
+            Debug.WriteLine("[FileReceiver] HTTP Server started on http://localhost:5000");
+            Debug.WriteLine("[FileReceiver] WebSocket Server started on http://localhost:5001");
         }
 
-        public void Stop() => _listener.Stop();
+        public async Task Stop()
+        {
+            _listener.Stop();
+            if (_webSocketService != null)
+            {
+                await _webSocketService.StopAsync();
+            }
+        }
+
+        public async Task NotifyFileUploaded(string fileName, long fileSize)
+        {
+            if (_webSocketService != null)
+            {
+                await _webSocketService.BroadcastFileNotificationAsync(fileName, "uploaded", fileSize);
+            }
+        }
+
+        public async Task NotifyFileDownloaded(string fileName, long fileSize)
+        {
+            if (_webSocketService != null)
+            {
+                await _webSocketService.BroadcastFileNotificationAsync(fileName, "downloaded", fileSize);
+            }
+        }
+
+        public async Task BroadcastMessage(string message)
+        {
+            if (_webSocketService != null)
+            {
+                await _webSocketService.BroadcastMessageAsync(message);
+            }
+        }
     }
 }

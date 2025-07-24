@@ -1,19 +1,20 @@
 Lệnh publish .exe với icon embedded
-```bash
 cd .\HungDuyParkingBridge\
-```
+
 # Standard publish với embedded icon
-```bash
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-```
+
 # Hoặc sử dụng publish profile tùy chỉnh
-```bash
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=embedded
-```
+
 Di chuyển đến thư mục để lấy file .exe đã publish
-```bash
 K:\Project\HungDuyCoLTD\HungDuyParkingBridge\HungDuyParkingBridge\bin\Release\net9.0-windows\win-x64\publish
-```
+cd .\bin\Release\net9.0-windows\win-x64\publish
+explorer .
+
+Di duyển đến thư mục project từ publish
+cd ../../../../../
+
 ## 🎨 Giải quyết vấn đề Icon mới
 
 ### Vấn đề thường gặp khi cập nhật icon:
@@ -50,9 +51,7 @@ dotnet build -c Debug
 ```bash
 rmdir /s /q bin obj
 dotnet restore
-dotnet build
-```
-#### 4. **Debug Icon Loading**:
+dotnet build#### 4. **Debug Icon Loading**:
 Khi chạy app, check console output để xem:
 - Embedded resources được tìm thấy
 - File system paths
@@ -157,3 +156,159 @@ curl http://localhost:5000/api/ping
 2. **Run Test Script**: `.\test-api-status.ps1`
 3. **Check Response**: Verify `status: true` in response
 4. **Monitor Uptime**: Track server uptime information
+
+## 🔌 WebSocket Real-time Communication (NEW v1.0.2)
+
+### Native WebSocket Implementation:
+
+HungDuy Parking Bridge hiện hỗ trợ **WebSocket real-time communication** cho việc thông báo file upload/download và trạng thái server.
+
+#### **🚀 WebSocket Features:**
+- ✅ **Native WebSocket**: Sử dụng System.Net.WebSockets của .NET 9
+- ✅ **Real-time notifications**: File upload/download events
+- ✅ **Bi-directional communication**: Client ↔ Server messaging
+- ✅ **Multiple clients**: Hỗ trợ nhiều client kết nối đồng thời
+- ✅ **JSON messaging**: Structured message protocol
+- ✅ **Auto-reconnection**: Client tự động kết nối lại
+
+#### **📡 Available Endpoints:**
+
+**WebSocket Connection:**ws://localhost:5001/ws
+**HTTP Status APIs:**
+- `GET http://localhost:5001/status` - WebSocket server status
+- `GET http://localhost:5001/` - Built-in test page
+- `POST http://localhost:5001/test` - Trigger test notification
+
+#### **💬 Message Protocol:**
+
+**Client → Server Messages:**// Ping server
+{ "type": "ping" }
+
+// Send message to all clients  
+{ "type": "message", "content": "Hello everyone!" }
+
+// Request server status
+{ "type": "status" }
+**Server → Client Messages:**// Welcome message
+{
+  "type": "connected",
+  "message": "Connected to HungDuy Parking Bridge WebSocket",
+  "timestamp": "2024-01-01T12:00:00.000Z",
+  "server": "HungDuyParkingBridge v1.0.2"
+}
+
+// File notification
+{
+  "type": "fileNotification", 
+  "fileName": "document.pdf",
+  "action": "uploaded",
+  "fileSize": 1024,
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+
+// Broadcast message
+{
+  "type": "message",
+  "sender": "user", 
+  "content": "Hello everyone!",
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+
+// Server status
+{
+  "type": "status",
+  "server": "HungDuyParkingBridge",
+  "version": "1.0.2", 
+  "connectedClients": 3,
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+
+// Pong response
+{
+  "type": "pong",
+  "timestamp": "2024-01-01T12:00:00.000Z"
+}
+#### **🧪 Testing WebSocket:**
+
+**1. PowerShell Test Script:**.\test-websocket.ps1
+**2. Built-in Test Page:**# Open browser to:
+http://localhost:5001/
+**3. Local HTML Test:**# Open file in browser:
+.\websocket-test.html
+**4. JavaScript Client Example:**const ws = new WebSocket('ws://localhost:5001/ws');
+
+ws.onopen = () => {
+    console.log('Connected to WebSocket');
+    // Send ping
+    ws.send(JSON.stringify({ type: 'ping' }));
+};
+
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Received:', data);
+    
+    if (data.type === 'fileNotification') {
+        console.log(`File ${data.action}: ${data.fileName}`);
+    }
+};
+
+// Send message to all clients
+ws.send(JSON.stringify({ 
+    type: 'message', 
+    content: 'Hello from JavaScript!' 
+}));
+#### **🔗 Integration với File Operations:**
+
+WebSocket tự động gửi thông báo khi:
+- ✅ **File Upload**: Client upload file qua HTTP API
+- ✅ **File Download**: Client download file
+- ✅ **System Events**: Server start/stop, client connect/disconnect
+
+#### **📊 WebSocket Status Dashboard:**
+
+Trong MainForm có tab **"🔌 WebSocket"** với:
+- ✅ **Connection status**: Trạng thái WebSocket server
+- ✅ **Test controls**: Send test messages và notifications
+- ✅ **Client count**: Số lượng client đang kết nối
+- ✅ **Real-time logging**: Debug WebSocket events
+
+#### **🛠️ Development Usage:**
+
+**Frontend Integration:**// Kết nối WebSocket cho real-time UI updates
+const ws = new WebSocket('ws://localhost:5001/ws');
+
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    
+    if (data.type === 'fileNotification') {
+        // Update file list in UI
+        updateFileList();
+        showNotification(`File ${data.action}: ${data.fileName}`);
+    }
+};
+**Monitoring Integration:**# Check WebSocket status via HTTP
+curl http://localhost:5001/status
+
+# Trigger test notification
+curl -X POST http://localhost:5001/test
+#### **🚨 Troubleshooting WebSocket:**
+
+**Connection Issues:**
+1. **Check ports**: Ensure 5001 không bị block
+2. **Firewall**: Allow WebSocket connections
+3. **Browser**: Modern browsers support WebSocket
+4. **CORS**: WebSocket server has CORS enabled
+
+**Testing Steps:**
+1. **Start Application**: Run HungDuyParkingBridge
+2. **Check Status**: `.\test-websocket.ps1`
+3. **Open Test Page**: `http://localhost:5001/`
+4. **Upload File**: Test thông báo real-time
+
+### 🎯 Use Cases:
+
+- **📱 Mobile Apps**: Real-time file notifications
+- **🖥️ Desktop Apps**: Live status updates  
+- **🌐 Web Dashboard**: Real-time monitoring
+- **📊 Analytics**: Live file transfer metrics
+- **🔔 Notifications**: Instant upload/download alerts

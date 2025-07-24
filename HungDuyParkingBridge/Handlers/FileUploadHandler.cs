@@ -12,11 +12,17 @@ namespace HungDuyParkingBridge.Handlers
     {
         private readonly string _savePath;
         private readonly FileApiService _apiService;
+        private WebSocketService? _webSocketService;
 
         public FileUploadHandler(string savePath, FileApiService apiService)
         {
             _savePath = savePath;
             _apiService = apiService;
+        }
+
+        public void SetWebSocketService(WebSocketService webSocketService)
+        {
+            _webSocketService = webSocketService;
         }
 
         public async Task<bool> TryHandle(HttpListenerContext context)
@@ -63,6 +69,12 @@ namespace HungDuyParkingBridge.Handlers
                     var fileInfo = new FileInfo(filePath);
                     _apiService.RegisterFile(fileName, fileInfo.Length);
                     uploadedFiles.Add(fileName);
+
+                    // Send WebSocket notification
+                    if (_webSocketService != null)
+                    {
+                        await _webSocketService.BroadcastFileNotificationAsync(fileName, "uploaded", fileInfo.Length);
+                    }
                 }
 
                 section = await multipartReader.ReadNextSectionAsync();
