@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using HungDuyParkingBridge.Models;
@@ -42,6 +42,9 @@ namespace HungDuyParkingBridge.Services
             {
                 return path switch
                 {
+                    "/api/status" when request.HttpMethod == "GET" => await HandleStatus(context),
+                    "/api/health" when request.HttpMethod == "GET" => await HandleStatus(context), // Alternative endpoint
+                    "/api/ping" when request.HttpMethod == "GET" => await HandleStatus(context),   // Alternative endpoint
                     "/api/files" when request.HttpMethod == "GET" => await HandleListFiles(context),
                     "/api/files" when request.HttpMethod == "POST" => await HandleCreateFile(context),
                     var p when p.StartsWith("/api/files/") && request.HttpMethod == "GET" => await HandleGetFile(context),
@@ -374,6 +377,38 @@ namespace HungDuyParkingBridge.Services
             });
 
             return true;
+        }
+
+        private async Task<bool> HandleStatus(HttpListenerContext context)
+        {
+            var response = context.Response;
+            
+            // Create status response with server information
+            var statusResponse = new ApiResponse<ResponeModel<string>>
+            {
+                Success = true,
+                Message = "Server is running",
+                Data = new ResponeModel<string>(
+                    "OK",
+                    "Server is operational"
+                   )
+            };
+
+            await SendJsonResponse(response, statusResponse);
+            return true;
+        }
+
+        private string GetUptime()
+        {
+            try
+            {
+                var uptime = DateTime.Now - System.Diagnostics.Process.GetCurrentProcess().StartTime;
+                return $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
+            }
+            catch
+            {
+                return "Unknown";
+            }
         }
 
         private string ExtractFileIdFromPath(string path)

@@ -93,3 +93,67 @@ ildasm HungDuyParkingBridge.exe
 - [ ] Test published version
 - [ ] Verify tray icon
 - [ ] Verify window icons
+
+## 🌐 API Status Endpoint (NEW v1.0.2)
+
+### Status API luôn trả về `true`:
+
+#### **Available Endpoints:**
+- `GET http://localhost:5000/api/status`
+- `GET http://localhost:5000/api/health` 
+- `GET http://localhost:5000/api/ping`
+
+#### **Response Format:**{
+  "Success": true,
+  "Message": "Server is running",
+  "Data": {
+    "status": true,
+    "server": "HungDuyParkingBridge",
+    "version": "1.0.2",
+    "timestamp": "2024-01-01T12:00:00.000Z",
+    "uptime": "0d 1h 30m 45s",
+    "endpoints": [
+      "GET /api/status",
+      "GET /api/health",
+      "GET /api/ping",
+      "GET /api/files",
+      "POST /api/files",
+      "POST /upload/",
+      "GET /download/{filename}"
+    ]
+  }
+}
+#### **Testing API:**
+
+**PowerShell Test:**# Chạy script test tự động
+.\test-api-status.ps1
+
+# Manual test
+Invoke-RestMethod -Uri "http://localhost:5000/api/status" -Method GET
+**cURL Commands:**# Test status endpoint
+curl http://localhost:5000/api/status
+
+# Test health endpoint  
+curl http://localhost:5000/api/health
+
+# Test ping endpoint
+curl http://localhost:5000/api/ping
+#### **Features:**
+- ✅ **Always returns true**: Status luôn là `true` khi server running
+- ✅ **Server info**: Tên server, version, uptime
+- ✅ **CORS enabled**: Cross-origin requests supported
+- ✅ **Multiple endpoints**: 3 endpoint aliases for flexibility
+- ✅ **Comprehensive data**: Timestamp, uptime, available endpoints list
+
+#### **Use Cases:**
+- **Health monitoring**: Check if server is alive
+- **Load balancer**: Health check endpoint
+- **Service discovery**: Verify service availability
+- **Debugging**: Quick server status verification
+
+### 🧪 Testing Status API:
+
+1. **Start Application**: Chạy app hoặc `dotnet run`
+2. **Run Test Script**: `.\test-api-status.ps1`
+3. **Check Response**: Verify `status: true` in response
+4. **Monitor Uptime**: Track server uptime information
