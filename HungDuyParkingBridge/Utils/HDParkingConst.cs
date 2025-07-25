@@ -10,7 +10,10 @@ namespace HungDuyParkingBridge.Utils
     {
         public static readonly string version = "1.0.2";
         public static readonly string key = "012233";
-        
+        public static readonly string nameSoftware = "HD Parking Bridge";
+        public static readonly string pathSaveFile = @"C:\HungDuyParkingReceivedFiles";
+        public static readonly string portHttp = "http://localhost:5000";
+        public static readonly string portWebSocket = "ws://localhost:5001/ws";
         // Admin access control
         public static bool IsAdminAuthenticated { get; set; } = false;
         

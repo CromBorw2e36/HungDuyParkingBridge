@@ -2,13 +2,14 @@ using System.Net;
 using System.Diagnostics;
 using HungDuyParkingBridge.Handlers;
 using HungDuyParkingBridge.Services;
+using HungDuyParkingBridge.Utils;
 
 namespace HungDuyParkingBridge.Services
 {
     internal class FileReceiverService
     {
         private readonly HttpListener _listener = new();
-        private readonly string _savePath = @"C:\HungDuyParkingReceivedFiles";
+        private readonly string _savePath = HDParkingConst.pathSaveFile;
         private FileUploadHandler _uploadHandler;
         private FileDownloadHandler _downloadHandler;
         private FileApiService _apiService;

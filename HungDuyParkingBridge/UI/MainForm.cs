@@ -69,7 +69,7 @@ namespace HungDuyParkingBridge.UI
         {
             if (HDParkingConst.IsAdminAuthenticated)
             {
-                lblAuthStatus.Text = "| 🔓 Admin Mode";
+                lblAuthStatus.Text = "| 🔓 Admin";
                 lblAuthStatus.ForeColor = Color.Green;
                 
                 // Show admin menu items
@@ -84,7 +84,7 @@ namespace HungDuyParkingBridge.UI
             }
             else
             {
-                lblAuthStatus.Text = "| 🔒 Guest Mode";
+                lblAuthStatus.Text = "| 🔒 Guest";
                 lblAuthStatus.ForeColor = Color.Red;
                 
                 // Hide admin menu items
@@ -121,7 +121,7 @@ namespace HungDuyParkingBridge.UI
 
         private void AddHomeTab()
         {
-            var homeTab = new TabPage("🏠 Home")
+            var homeTab = new TabPage("🏠 Trang chính")
             {
                 UseVisualStyleBackColor = true,
                 Padding = new Padding(20)
@@ -153,28 +153,40 @@ namespace HungDuyParkingBridge.UI
         {
             try
             {
-                // Try to load background image from multiple possible locations
-                string[] possiblePaths = {
-                    Path.Combine(Application.StartupPath, "Publics", "Images", "background-home-page.png"),
-                    Path.Combine(Application.StartupPath, "Images", "background-home-page.png"),
-                    Path.Combine(Application.StartupPath, "background-home-page.png"),
-                    Path.Combine(Directory.GetCurrentDirectory(), "Publics", "Images", "background-home-page.png")
-                };
+                Image backgroundImage = null;
 
-                string backgroundPath = null;
-                foreach (string path in possiblePaths)
+                // First try to load from embedded resources (for published single file)
+                backgroundImage = LoadBackgroundFromEmbeddedResources();
+
+                // If not found in embedded resources, try file system paths
+                if (backgroundImage == null)
                 {
-                    if (File.Exists(path))
+                    string[] possiblePaths = {
+                        Path.Combine(Application.StartupPath, "Publics", "Images", "background-home-page.png"),
+                        Path.Combine(Application.StartupPath, "Images", "background-home-page.png"),
+                        Path.Combine(Application.StartupPath, "background-home-page.png"),
+                        Path.Combine(Directory.GetCurrentDirectory(), "Publics", "Images", "background-home-page.png")
+                    };
+
+                    string backgroundPath = null;
+                    foreach (string path in possiblePaths)
                     {
-                        backgroundPath = path;
-                        break;
+                        if (File.Exists(path))
+                        {
+                            backgroundPath = path;
+                            break;
+                        }
+                    }
+
+                    if (backgroundPath != null)
+                    {
+                        backgroundImage = Image.FromFile(backgroundPath);
                     }
                 }
 
-                if (backgroundPath != null)
+                // If we have a background image (from either source), display it
+                if (backgroundImage != null)
                 {
-                    // Load and display the actual background image
-                    var backgroundImage = Image.FromFile(backgroundPath);
                     var pictureBox = new PictureBox
                     {
                         Dock = DockStyle.Fill,
@@ -186,7 +198,7 @@ namespace HungDuyParkingBridge.UI
                 }
                 else
                 {
-                    // Create directory and placeholder if background doesn't exist
+                    // Create and save placeholder if no background found
                     string defaultPath = Path.Combine(Application.StartupPath, "Publics", "Images", "background-home-page.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(defaultPath));
                     CreatePlaceholderBackground(defaultPath);
@@ -194,7 +206,7 @@ namespace HungDuyParkingBridge.UI
                     // Try to load the created placeholder
                     if (File.Exists(defaultPath))
                     {
-                        var backgroundImage = Image.FromFile(defaultPath);
+                        backgroundImage = Image.FromFile(defaultPath);
                         var pictureBox = new PictureBox
                         {
                             Dock = DockStyle.Fill,
@@ -219,6 +231,50 @@ namespace HungDuyParkingBridge.UI
                 // Fallback: Just background color
                 homePanel.BackColor = Color.FromArgb(245, 245, 250);
             }
+        }
+
+        private Image LoadBackgroundFromEmbeddedResources()
+        {
+            try
+            {
+                // Get the current assembly
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                
+                // Try different possible resource names
+                string[] possibleResourceNames = {
+                    "HungDuyParkingBridge.Publics.Images.background-home-page.png",
+                    "HungDuyParkingBridge.Images.background-home-page.png", 
+                    "HungDuyParkingBridge.background-home-page.png"
+                };
+
+                foreach (string resourceName in possibleResourceNames)
+                {
+                    using (var stream = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if (stream != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Successfully loaded background from embedded resource: {resourceName}");
+                            return Image.FromStream(stream);
+                        }
+                    }
+                }
+
+                // Debug: List all available embedded resources
+                System.Diagnostics.Debug.WriteLine("Available embedded resources:");
+                foreach (string name in assembly.GetManifestResourceNames())
+                {
+                    if (name.Contains("background") || name.Contains("png") || name.Contains("image"))
+                    {
+                        System.Diagnostics.Debug.WriteLine($" - {name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading background from embedded resources: {ex.Message}");
+            }
+
+            return null;
         }
 
         private void CreatePlaceholderBackground(string backgroundPath)
@@ -258,8 +314,8 @@ namespace HungDuyParkingBridge.UI
                     using (var titleFont = new Font("Segoe UI", 36, FontStyle.Bold))
                     using (var subtitleFont = new Font("Segoe UI", 18, FontStyle.Regular))
                     {
-                        var titleText = "HungDuy Parking Bridge";
-                        var subtitleText = "File Management System";
+                        var titleText = HDParkingConst.nameSoftware;
+                        var subtitleText = "";
                         
                         var titleSize = graphics.MeasureString(titleText, titleFont);
                         var subtitleSize = graphics.MeasureString(subtitleText, subtitleFont);
@@ -353,7 +409,7 @@ namespace HungDuyParkingBridge.UI
                 Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(300, 25),
-                Text = "http://localhost:5000"
+                Text = HDParkingConst.portHttp
             };
 
             currentY += 40;
@@ -372,7 +428,7 @@ namespace HungDuyParkingBridge.UI
                 Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(300, 25),
-                Text = "ws://localhost:5001/ws"
+                Text = HDParkingConst.portWebSocket,
             };
 
             currentY += 40;
@@ -392,7 +448,7 @@ namespace HungDuyParkingBridge.UI
                 Location = new Point(150, currentY - 3),
                 ReadOnly = true,
                 Size = new Size(500, 25),
-                Text = "C:\\HungDuyParkingReceivedFiles"
+                Text = HDParkingConst.pathSaveFile,
             };
 
             currentY += 50;
@@ -724,7 +780,7 @@ namespace HungDuyParkingBridge.UI
                     await _receiver.Stop();
                     await Task.Delay(1000);
                     await _receiver.Start();
-                    trayIcon.ShowBalloonTip(3000, "HungDuy Parking", "Server restarted successfully", ToolTipIcon.Info);
+                    trayIcon.ShowBalloonTip(3000, HDParkingConst.nameSoftware, "Server restarted successfully", ToolTipIcon.Info);
                 }
                 catch (Exception ex)
                 {
@@ -753,7 +809,7 @@ namespace HungDuyParkingBridge.UI
 
             trayIcon = new NotifyIcon
             {
-                Text = "Hung Duy Parking FileReceiver Beta - " + (HDParkingConst.IsAdminAuthenticated ? "Admin Mode" : "Guest Mode"),
+                Text = HDParkingConst.nameSoftware,
                 Icon = customIcon,
                 ContextMenuStrip = trayMenu,
                 Visible = true
@@ -821,8 +877,8 @@ namespace HungDuyParkingBridge.UI
             
             // Show notification that service is still running
             trayIcon.ShowBalloonTip(3000, 
-                "Thông báo", 
-                "Ứng dụng đâng chạy nền!", 
+                "Thông báo",
+                "Ứng dụng đang chạy nền!", 
                 ToolTipIcon.Info);
         }
 
@@ -897,7 +953,7 @@ namespace HungDuyParkingBridge.UI
                     return;
                 }
 
-                string savePath = @"C:\HungDuyParkingReceivedFiles";
+                string savePath =HDParkingConst.pathSaveFile;
                 if (Directory.Exists(savePath))
                 {
                     int fileCount = Directory.GetFiles(savePath, "*", SearchOption.AllDirectories).Length;
@@ -993,7 +1049,7 @@ namespace HungDuyParkingBridge.UI
 
             try
             {
-                string savePath = @"C:\HungDuyParkingReceivedFiles";
+                string savePath = HDParkingConst.pathSaveFile;
                 if (Directory.Exists(savePath))
                 {
                     System.Diagnostics.Process.Start("explorer.exe", savePath);

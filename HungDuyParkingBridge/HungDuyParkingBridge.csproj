@@ -53,7 +53,12 @@
 
   <!-- BACKGROUND IMAGES CONFIGURATION -->
   <ItemGroup>
-    <!-- Include background image if it exists -->
+    <!-- Embed background image as resource for single file publish -->
+    <EmbeddedResource Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')" />
+    <EmbeddedResource Include="Images\background-home-page.png" Condition="Exists('Images\background-home-page.png')" />
+    <EmbeddedResource Include="background-home-page.png" Condition="Exists('background-home-page.png')" />
+    
+    <!-- Also keep Content for development/debugging -->
     <Content Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
