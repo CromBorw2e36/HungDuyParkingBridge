@@ -383,15 +383,31 @@ namespace HungDuyParkingBridge.Services
         {
             var response = context.Response;
             
-            // Create status response with server information
-            var statusResponse = new ApiResponse<ResponeModel<string>>
+            // Create comprehensive status response
+            var statusData = new
+            {
+                status = true,
+                server = "HungDuyParkingBridge",
+                version = HDParkingConst.version,
+                timestamp = DateTime.UtcNow.ToString("o"),
+                uptime = GetUptime(),
+                endpoints = new string[]
+                {
+                    "GET /api/status",
+                    "GET /api/health", 
+                    "GET /api/ping",
+                    "GET /api/files",
+                    "POST /api/files",
+                    "POST /upload/",
+                    "GET /download/{filename}"
+                }
+            };
+
+            var statusResponse = new ApiResponse<object>
             {
                 Success = true,
                 Message = "Server is running",
-                Data = new ResponeModel<string>(
-                    "OK",
-                    "Server is operational"
-                   )
+                Data = statusData
             };
 
             await SendJsonResponse(response, statusResponse);

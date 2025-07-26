@@ -240,7 +240,17 @@ namespace HungDuyParkingBridge.UI
                 // Get the current assembly
                 var assembly = System.Reflection.Assembly.GetExecutingAssembly();
                 
-                // Try different possible resource names
+                // Try the LogicalName first (for single file publish)
+                using (var stream = assembly.GetManifestResourceStream("background-home-page.png"))
+                {
+                    if (stream != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Successfully loaded background from embedded resource: background-home-page.png");
+                        return Image.FromStream(stream);
+                    }
+                }
+
+                // Try different possible resource names as fallback
                 string[] possibleResourceNames = {
                     "HungDuyParkingBridge.Publics.Images.background-home-page.png",
                     "HungDuyParkingBridge.Images.background-home-page.png", 
@@ -386,7 +396,7 @@ namespace HungDuyParkingBridge.UI
                 Font = new Font("Segoe UI", 9F),
                 Location = new Point(15, 25),
                 Size = new Size(670, 25),
-                Text = "✅ Admin access granted - All features available",
+                Text = "✅ Admin access granted - All features available | Servers always running",
                 ForeColor = Color.DarkGreen
             };
 
@@ -724,7 +734,7 @@ namespace HungDuyParkingBridge.UI
         }
 
         // Authentication event handlers
-        private void AuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void AuthenticationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (var authDialog = new PrivateKeyDialog())
             {
@@ -732,23 +742,32 @@ namespace HungDuyParkingBridge.UI
                 {
                     UpdateAuthenticationStatus();
                     RefreshTabsBasedOnAuth();
-                    MessageBox.Show("🎉 Welcome to Admin Mode!\n\nAll administrative features are now available.", 
+                    
+                    // Server is already running - just update status message
+                    UpdateStatus("Running - HTTP and WebSocket servers available");
+                    
+                    MessageBox.Show("🎉 Welcome to Admin Mode!\n\nAll administrative features are now available.\n\nNote: HTTP and WebSocket servers are always running.", 
                         "Authentication Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
 
-        private void LogoutToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void LogoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Are you sure you want to logout from admin mode?\n\nAdministrative features will be hidden.", 
+            var result = MessageBox.Show("Are you sure you want to logout from admin mode?\n\nNote: HTTP and WebSocket servers will continue running.", 
                 "Confirm Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
+                // Only update authentication status - DO NOT stop servers
                 HDParkingConst.SetAdminAccess(false);
                 UpdateAuthenticationStatus();
                 RefreshTabsBasedOnAuth();
-                MessageBox.Show("🔒 Logged out successfully.\n\nSwitched to Guest Mode.", 
+                
+                // Servers continue running - just update status message
+                UpdateStatus("Running - HTTP and WebSocket servers available (Guest mode)");
+                
+                MessageBox.Show("🔒 Logged out successfully.\n\nSwitched to Guest Mode.\n\nNote: HTTP and WebSocket servers continue running.", 
                     "Logout Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -769,17 +788,15 @@ namespace HungDuyParkingBridge.UI
             var restartItem = new ToolStripMenuItem("Khởi động lại");
             restartItem.Click += async (s, e) =>
             {
-                if (!HDParkingConst.IsAdminAuthenticated)
-                {
-                    trayIcon.ShowBalloonTip(3000, "Access Denied", "Admin authentication required", ToolTipIcon.Warning);
-                    return;
-                }
-
+                // Allow restart for anyone since servers are always running
                 try
                 {
                     await _receiver.Stop();
                     await Task.Delay(1000);
                     await _receiver.Start();
+                    
+                    var authStatus = HDParkingConst.IsAdminAuthenticated ? "Admin mode" : "Guest mode";
+                    UpdateStatus($"Running - HTTP and WebSocket servers restarted ({authStatus})");
                     trayIcon.ShowBalloonTip(3000, HDParkingConst.nameSoftware, "Server restarted successfully", ToolTipIcon.Info);
                 }
                 catch (Exception ex)
@@ -792,11 +809,17 @@ namespace HungDuyParkingBridge.UI
             var exitItem = new ToolStripMenuItem("Thoát");
             exitItem.Click += async (s, e) =>
             {
-                // Properly stop services before exiting
-                if (HDParkingConst.IsAdminAuthenticated)
+                // Always stop services before exiting (regardless of auth status)
+                try
                 {
                     await _receiver.Stop();
                 }
+                catch (Exception ex)
+                {
+                    // Log error but continue with exit
+                    System.Diagnostics.Debug.WriteLine($"Error stopping services: {ex.Message}");
+                }
+                
                 trayIcon.Visible = false;  
                 trayIcon.Dispose();        
                 Application.Exit();
@@ -848,15 +871,16 @@ namespace HungDuyParkingBridge.UI
             SetupTray();
             AddToStartup();
             
-            // Only start services if authenticated
-            if (HDParkingConst.IsAdminAuthenticated)
+            // ALWAYS start HTTP and WebSocket servers regardless of authentication
+            // Authentication only controls UI access, not service availability
+            try
             {
                 await _receiver.Start();
                 UpdateStatus("Running - HTTP and WebSocket servers started");
             }
-            else
+            catch (Exception ex)
             {
-                UpdateStatus("Guest mode - Services not started");
+                UpdateStatus($"Error starting servers: {ex.Message}");
             }
             
             this.Hide();
@@ -913,16 +937,13 @@ namespace HungDuyParkingBridge.UI
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            // Update file count every minute
-            if (HDParkingConst.IsAdminAuthenticated)
+            // Always update file count since servers are always running
+            UpdateFileCount();
+            
+            // Only run cleanup if admin authenticated (cleanup is admin-only feature)
+            if (HDParkingConst.IsAdminAuthenticated && _cleanupService.IsEnabled)
             {
-                UpdateFileCount();
-                
-                // Run cleanup if enabled
-                if (_cleanupService.IsEnabled)
-                {
-                    _cleanupService.CleanupOldFiles();
-                }
+                _cleanupService.CleanupOldFiles();
             }
         }
 
@@ -947,39 +968,40 @@ namespace HungDuyParkingBridge.UI
 
             try
             {
-                if (!HDParkingConst.IsAdminAuthenticated)
-                {
-                    lblFileCount.Text = "Files: Access denied";
-                    return;
-                }
-
-                string savePath =HDParkingConst.pathSaveFile;
+                string savePath = HDParkingConst.pathSaveFile;
                 if (Directory.Exists(savePath))
                 {
                     int fileCount = Directory.GetFiles(savePath, "*", SearchOption.AllDirectories).Length;
-                    lblFileCount.Text = $"Files: {fileCount}";
+                    
+                    // Show file count but indicate access level
+                    if (HDParkingConst.IsAdminAuthenticated)
+                    {
+                        lblFileCount.Text = $"Files: {fileCount} (Admin access)";
+                    }
+                    else
+                    {
+                        lblFileCount.Text = $"Files: {fileCount} (Guest access)";
+                    }
+                }
+                else
+                {
+                    lblFileCount.Text = "Files: 0 (Folder not found)";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                lblFileCount.Text = "Files: 0";
+                lblFileCount.Text = $"Files: Error ({ex.Message})";
             }
         }
 
-        // WebSocket test methods - only work if authenticated
+        // WebSocket test methods - work regardless of authentication since servers are always running
         private async Task SendTestMessage(string message)
         {
-            if (!HDParkingConst.IsAdminAuthenticated)
-            {
-                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             try
             {
                 await _receiver.BroadcastMessage($"Test: {message}");
-                MessageBox.Show("Test message sent via WebSocket!", "Success", 
+                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
+                MessageBox.Show($"Test message sent via WebSocket!{authNote}", "Success", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -991,18 +1013,12 @@ namespace HungDuyParkingBridge.UI
 
         private async Task SendTestFileNotification()
         {
-            if (!HDParkingConst.IsAdminAuthenticated)
-            {
-                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             try
             {
                 string testFileName = $"test-file-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
                 await _receiver.NotifyFileUploaded(testFileName, 1024);
-                MessageBox.Show($"Test file notification sent: {testFileName}", "Success", 
+                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
+                MessageBox.Show($"Test file notification sent: {testFileName}{authNote}", "Success", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -1014,13 +1030,6 @@ namespace HungDuyParkingBridge.UI
 
         private void OpenWebSocketTestPage()
         {
-            if (!HDParkingConst.IsAdminAuthenticated)
-            {
-                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             try
             {
                 string testPageUrl = "http://localhost:5001/";
@@ -1098,33 +1107,33 @@ namespace HungDuyParkingBridge.UI
 
         private async void RestartServer()
         {
-            if (!HDParkingConst.IsAdminAuthenticated)
-            {
-                MessageBox.Show("❌ Admin authentication required", "Access Denied", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
+            // Allow server restart regardless of authentication since servers are always running
             try
             {
-                var result = MessageBox.Show("Are you sure you want to restart the server?", 
-                    "Confirm Restart", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = MessageBox.Show("Are you sure you want to restart the HTTP and WebSocket servers?\n\nThis will temporarily interrupt service for all users.", 
+                    "Confirm Server Restart", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (result == DialogResult.Yes)
                 {
+                    UpdateStatus("Restarting servers...");
                     await _receiver.Stop();
-                    UpdateStatus("Restarting server...");
                     
                     // Small delay before restart
                     await Task.Delay(1000);
                     
                     await _receiver.Start();
-                    UpdateStatus("Servers restarted successfully");
+                    
+                    var authStatus = HDParkingConst.IsAdminAuthenticated ? "Admin mode" : "Guest mode";
+                    UpdateStatus($"Running - HTTP and WebSocket servers restarted ({authStatus})");
+                    
+                    MessageBox.Show("✅ Servers restarted successfully!\n\nHTTP and WebSocket services are now available.", 
+                        "Restart Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error restarting server: {ex.Message}", "Error", 
+                UpdateStatus($"Error restarting servers: {ex.Message}");
+                MessageBox.Show($"Error restarting servers: {ex.Message}", "Restart Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

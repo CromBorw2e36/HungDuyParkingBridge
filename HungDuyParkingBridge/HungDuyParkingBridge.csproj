@@ -51,22 +51,31 @@
     </Content>
   </ItemGroup>
 
-  <!-- BACKGROUND IMAGES CONFIGURATION -->
+  <!-- BACKGROUND IMAGES CONFIGURATION - FIXED FOR SINGLE FILE PUBLISH -->
   <ItemGroup>
-    <!-- Embed background image as resource for single file publish -->
-    <EmbeddedResource Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')" />
-    <EmbeddedResource Include="Images\background-home-page.png" Condition="Exists('Images\background-home-page.png')" />
-    <EmbeddedResource Include="background-home-page.png" Condition="Exists('background-home-page.png')" />
+    <!-- Embed background images as resources with proper logical names -->
+    <EmbeddedResource Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')">
+      <LogicalName>background-home-page.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\background-home-page.png" Condition="Exists('Images\background-home-page.png')">
+      <LogicalName>background-home-page.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="background-home-page.png" Condition="Exists('background-home-page.png')">
+      <LogicalName>background-home-page.png</LogicalName>
+    </EmbeddedResource>
     
-    <!-- Also keep Content for development/debugging -->
+    <!-- Also keep Content for development/debugging (not included in single file) -->
     <Content Include="Publics\Images\background-home-page.png" Condition="Exists('Publics\Images\background-home-page.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="Images\background-home-page.png" Condition="Exists('Images\background-home-page.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="background-home-page.png" Condition="Exists('background-home-page.png')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
   </ItemGroup>
 
