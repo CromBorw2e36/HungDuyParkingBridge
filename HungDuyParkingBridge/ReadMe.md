@@ -1,4 +1,16 @@
-Lệnh publish .exe với icon embeddedcd .\HungDuyParkingBridge\# Standard publish với embedded icondotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true# Hoặc sử dụng publish profile tùy chỉnhdotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=embeddedDi chuyển đến thư mục để lấy file .exe đã publishK:\Project\HungDuyCoLTD\HungDuyParkingBridge\HungDuyParkingBridge\bin\Release\net9.0-windows\win-x64\publishcd .\bin\Release\net9.0-windows\win-x64\publish
+# Lệnh publish .exe với icon embedded
+
+cd .\HungDuyParkingBridge\
+
+# Standard publish với embedded icon
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+
+# Hoặc sử dụng publish profile tùy chỉnh
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=embedded
+
+Di chuyển đến thư mục để lấy file .exe đã publish
+
+K:\Project\HungDuyCoLTD\HungDuyParkingBridge\HungDuyParkingBridge\bin\Release\net9.0-windows\win-x64\publishcd .\bin\Release\net9.0-windows\win-x64\publish
 explorer .
 
 Di duyển đến thư mục project từ publish
