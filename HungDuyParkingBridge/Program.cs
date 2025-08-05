@@ -1,5 +1,6 @@
 using HungDuyParkingBridge.UI;
 using HungDuyParkingBridge.Utilities;
+using HungDuyParkingBridge.Utils;
 using System.Reflection;
 
 namespace HungDuyParkingBridge
@@ -12,13 +13,30 @@ namespace HungDuyParkingBridge
         [STAThread]
         static void Main()
         {
+            // Check if another instance is already running using the improved SingleInstanceHelper
+            if (!SingleInstanceHelper.IsFirstInstance())
+            {
+                // Another instance is running, show message and attempt to bring it to front
+                SingleInstanceHelper.ShowInstanceAlreadyRunningMessage();
+                return;
+            }
+
             // Test icon loading before starting the application
             TestIconLoading();
             
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
+            
+            try
+            {
+                Application.Run(new MainForm());
+            }
+            finally
+            {
+                // Ensure mutex is properly released when application exits
+                SingleInstanceHelper.ReleaseMutex();
+            }
         }
 
         private static void TestIconLoading()

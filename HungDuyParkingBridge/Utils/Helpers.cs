@@ -1,4 +1,4 @@
-﻿namespace HungDuyParkingBridge.Utils
+namespace HungDuyParkingBridge.Utils
 {
     public static class MimeTypeHelper
     {
