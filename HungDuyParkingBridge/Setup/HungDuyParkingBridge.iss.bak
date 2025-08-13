@@ -38,7 +38,7 @@ Name: "vietnamese"; MessagesFile: "compiler:Languages\Vietnamese.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
-Name: "startupicon"; Description: "Start automatically when Windows starts (via Registry)"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "startupicon"; Description: "Start automatically when Windows starts (via Registry)"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Files]
 Source: "..\bin\Release\net9.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
@@ -71,8 +71,25 @@ Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: 
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
 
-; Add the new startup entry (only if startup task is selected)
-Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HungDuyParkingBridge"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon
+; Clean up any old StartupApproved entries
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+
+; Add the startup entry to HKLM if we have admin rights
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HungDuyParkingBridge"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon; Check: IsAdminInstallMode
+
+; Add the enabled binary value to StartupApproved in HKLM if we have admin rights
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: binary; ValueName: "HungDuyParkingBridge"; ValueData: "00,00,00,00,00,00,00,00,00,00,00,00"; Flags: uninsdeletevalue; Tasks: startupicon; Check: IsAdminInstallMode
+
+; Fallback to HKCU if we don't have admin rights
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HungDuyParkingBridge"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon; Check: not IsAdminInstallMode
+
+; Add the enabled binary value to StartupApproved in HKCU if we don't have admin rights
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: binary; ValueName: "HungDuyParkingBridge"; ValueData: "00,00,00,00,00,00,00,00,00,00,00,00"; Flags: uninsdeletevalue; Tasks: startupicon; Check: not IsAdminInstallMode
 
 [Code]
 // Forward declaration of the procedures
@@ -164,11 +181,13 @@ procedure CleanupStartupEntries();
 var
   Names: TArrayOfString;
   I: Integer;
-  HKLMKey, HKCUKey: String;
+  HKLMKey, HKCUKey, HKLMApprovedKey, HKCUApprovedKey: String;
 begin
   // Define the registry keys
   HKLMKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run';
   HKCUKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run';
+  HKLMApprovedKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run';
+  HKCUApprovedKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run';
   
   // List of possible old startup entry names
   SetArrayLength(Names, 3);
@@ -176,23 +195,43 @@ begin
   Names[1] := 'HungDuyParkingFileReceiver_beta';
   Names[2] := 'HungDuyParkingBridge';
   
-  // Remove from HKLM
+  // Remove from HKLM Run
   for I := 0 to GetArrayLength(Names) - 1 do
   begin
     if RegValueExists(HKLM, HKLMKey, Names[I]) then
     begin
       RegDeleteValue(HKLM, HKLMKey, Names[I]);
-      Log('Removed startup entry from HKLM: ' + Names[I]);
+      Log('Removed startup entry from HKLM Run: ' + Names[I]);
     end;
   end;
   
-  // Remove from HKCU
+  // Remove from HKCU Run
   for I := 0 to GetArrayLength(Names) - 1 do
   begin
     if RegValueExists(HKCU, HKCUKey, Names[I]) then
     begin
       RegDeleteValue(HKCU, HKCUKey, Names[I]);
-      Log('Removed startup entry from HKCU: ' + Names[I]);
+      Log('Removed startup entry from HKCU Run: ' + Names[I]);
+    end;
+  end;
+  
+  // Remove from HKLM StartupApproved
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKLM, HKLMApprovedKey, Names[I]) then
+    begin
+      RegDeleteValue(HKLM, HKLMApprovedKey, Names[I]);
+      Log('Removed startup entry from HKLM StartupApproved: ' + Names[I]);
+    end;
+  end;
+  
+  // Remove from HKCU StartupApproved
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKCU, HKCUApprovedKey, Names[I]) then
+    begin
+      RegDeleteValue(HKCU, HKCUApprovedKey, Names[I]);
+      Log('Removed startup entry from HKCU StartupApproved: ' + Names[I]);
     end;
   end;
 end;

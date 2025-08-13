@@ -852,93 +852,14 @@ namespace HungDuyParkingBridge.UI
         /// <summary>
         /// Checks if this application is set to run at startup via registry entries.
         /// If no registry startup entry exists, creates one in HKCU.
-        /// This only runs when launched from shortcuts, not background services.
+        /// Also ensures the startup entry is enabled in Task Manager.
         /// </summary>
         private void EnsureStartup()
         {
             try
             {
-                // Check if this is a startup launch or normal user launch
-                if (IsLaunchedFromStartup())
-                {
-                    // Skip startup registration if launched during Windows startup
-                    System.Diagnostics.Debug.WriteLine("Application launched during Windows startup - skipping startup registration");
-                    return;
-                }
-                
-                // First check if already in HKLM (set by installer)
-                bool inHKLM = false;
-                try
-                {
-                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
-                    {
-                        if (key != null)
-                        {
-                            string value = key.GetValue("HungDuyParkingBridge") as string;
-                            inHKLM = !string.IsNullOrEmpty(value) && value.Contains(Path.GetFileName(Application.ExecutablePath));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log error but continue checking HKCU
-                    System.Diagnostics.Debug.WriteLine($"Error checking HKLM startup registry: {ex.Message}");
-                }
-                
-                // If not in HKLM, check if already in HKCU
-                if (!inHKLM)
-                {
-                    bool inHKCU = false;
-                    try
-                    {
-                        using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
-                        {
-                            if (key != null)
-                            {
-                                string value = key.GetValue("HungDuyParkingBridge") as string;
-                                inHKCU = !string.IsNullOrEmpty(value) && value.Contains(Path.GetFileName(Application.ExecutablePath));
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log error but continue
-                        System.Diagnostics.Debug.WriteLine($"Error checking HKCU startup registry: {ex.Message}");
-                    }
-                    
-                    // If not in HKLM and not in HKCU, add to HKCU
-                    if (!inHKCU)
-                    {
-                        try
-                        {
-                            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
-                            {
-                                if (key != null)
-                                {
-                                    key.SetValue("HungDuyParkingBridge", Application.ExecutablePath);
-                                    System.Diagnostics.Debug.WriteLine("Added application to HKCU startup registry");
-                                }
-                                else
-                                {
-                                    System.Diagnostics.Debug.WriteLine("Failed to open HKCU registry key for writing");
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log error but don't crash
-                            System.Diagnostics.Debug.WriteLine($"Error adding to HKCU startup registry: {ex.Message}");
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("Application already in HKCU startup registry");
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Application already in HKLM startup registry (set by installer)");
-                }
+                // Always ensure startup is enabled, regardless of how the app was launched
+                StartupManager.EnsureStartupEnabled();
             }
             catch (Exception ex)
             {
@@ -1129,15 +1050,8 @@ namespace HungDuyParkingBridge.UI
         {
             SetupTray();
             
-            // Only ensure startup when launched from a shortcut (not during startup or from other processes)
-            if (IsLaunchedFromShortcut())
-            {
-                EnsureStartup();
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("Not launched from shortcut - skipping startup registry check");
-            }
+            // Always ensure the application is registered in startup and enabled
+            EnsureStartup();
             
             // ALWAYS start HTTP and WebSocket servers regardless of authentication
             // Authentication only controls UI access, not service availability
@@ -1248,6 +1162,13 @@ namespace HungDuyParkingBridge.UI
             {
                 _cleanupService.CleanupOldFiles();
             }
+            
+            // Periodically check and ensure startup is enabled (every ~5 minutes)
+            // This helps if someone manually disables it through Task Manager
+            if (DateTime.Now.Minute % 5 == 0 && DateTime.Now.Second < 10)
+            {
+                EnsureStartup();
+            }
         }
 
         private void UpdateStatus(string status)
@@ -1297,59 +1218,6 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
-        // WebSocket test methods - work regardless of authentication since servers are always running
-        private async Task SendTestMessage(string message)
-        {
-            try
-            {
-                await _receiver.BroadcastMessage($"Test: {message}");
-                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
-                MessageBox.Show($"Test message sent via WebSocket!{authNote}", "Success", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error sending test message: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async Task SendTestFileNotification()
-        {
-            try
-            {
-                string testFileName = $"test-file-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
-                await _receiver.NotifyFileUploaded(testFileName, 1024);
-                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
-                MessageBox.Show($"Test file notification sent: {testFileName}{authNote}", "Success", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error sending test notification: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void OpenWebSocketTestPage()
-        {
-            try
-            {
-                string testPageUrl = "http://localhost:5001/";
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = testPageUrl,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Cannot open test page: {ex.Message}", "Error", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // Quick action methods - require authentication
         private void OpenSaveFolder()
         {
             if (!HDParkingConst.IsAdminAuthenticated)
@@ -1441,20 +1309,61 @@ namespace HungDuyParkingBridge.UI
             }
         }
 
-        // Menu event handlers
-        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async Task SendTestMessage(string message)
         {
-            // File menu actions
+            try
+            {
+                await _receiver.BroadcastMessage($"Test: {message}");
+                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
+                MessageBox.Show($"Test message sent via WebSocket!{authNote}", "Success", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error sending test message: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
+        private async Task SendTestFileNotification()
+        {
+            try
+            {
+                string testFileName = $"test-file-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
+                await _receiver.NotifyFileUploaded(testFileName, 1024);
+                var authNote = HDParkingConst.IsAdminAuthenticated ? " (Admin mode)" : " (Guest mode)";
+                MessageBox.Show($"Test file notification sent: {testFileName}{authNote}", "Success", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error sending test notification: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void OpenWebSocketTestPage()
+        {
+            try
+            {
+                string testPageUrl = "http://localhost:5001/";
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = testPageUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Cannot open test page: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Menu event handlers
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
-        }
-
-        private void viewToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // View menu actions
         }
 
         private void helpToolStripMenuItem_Click(object sender, EventArgs e)
