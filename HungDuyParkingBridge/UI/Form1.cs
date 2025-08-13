@@ -92,14 +92,14 @@ namespace HungDuyParkingBridge.UI
         {
             try
             {
-                string appName = "HungDuyParkingFileReceiver_beta"; // Tên tùy ý, dùng để đặt trong Registry
-                string exePath = Application.ExecutablePath;
+                //string appName = "HungDuyParkingFileReceiver_beta"; // Tên tùy ý, dùng để đặt trong Registry
+                //string exePath = Application.ExecutablePath;
 
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                if (key != null)
-                {
-                    key.SetValue(appName, exePath);
-                }
+                //RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                //if (key != null)
+                //{
+                //    key.SetValue(appName, exePath);
+                //}
             }
             catch (Exception ex)
             {

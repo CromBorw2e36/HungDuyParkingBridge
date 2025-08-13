@@ -5,6 +5,9 @@ using HungDuyParkingBridge.Utils;
 using System.Text;
 using System.Globalization;
 using System.Drawing.Drawing2D;
+using System.Diagnostics;
+using System.Security.Principal;
+using System.Management;
 
 namespace HungDuyParkingBridge.UI
 {
@@ -845,42 +848,342 @@ namespace HungDuyParkingBridge.UI
         {
             return ResourceHelper.GetApplicationIcon();
         }
+        
+        /// <summary>
+        /// Checks if this application is set to run at startup via registry entries.
+        /// If no registry startup entry exists, creates one in HKCU.
+        /// This only runs when launched from shortcuts, not background services.
+        /// </summary>
+        private void EnsureStartup()
+        {
+            try
+            {
+                // Check if this is a startup launch or normal user launch
+                if (IsLaunchedFromStartup())
+                {
+                    // Skip startup registration if launched during Windows startup
+                    System.Diagnostics.Debug.WriteLine("Application launched during Windows startup - skipping startup registration");
+                    return;
+                }
+                
+                // First check if already in HKLM (set by installer)
+                bool inHKLM = false;
+                try
+                {
+                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
+                    {
+                        if (key != null)
+                        {
+                            string value = key.GetValue("HungDuyParkingBridge") as string;
+                            inHKLM = !string.IsNullOrEmpty(value) && value.Contains(Path.GetFileName(Application.ExecutablePath));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but continue checking HKCU
+                    System.Diagnostics.Debug.WriteLine($"Error checking HKLM startup registry: {ex.Message}");
+                }
+                
+                // If not in HKLM, check if already in HKCU
+                if (!inHKLM)
+                {
+                    bool inHKCU = false;
+                    try
+                    {
+                        using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false))
+                        {
+                            if (key != null)
+                            {
+                                string value = key.GetValue("HungDuyParkingBridge") as string;
+                                inHKCU = !string.IsNullOrEmpty(value) && value.Contains(Path.GetFileName(Application.ExecutablePath));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue
+                        System.Diagnostics.Debug.WriteLine($"Error checking HKCU startup registry: {ex.Message}");
+                    }
+                    
+                    // If not in HKLM and not in HKCU, add to HKCU
+                    if (!inHKCU)
+                    {
+                        try
+                        {
+                            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true))
+                            {
+                                if (key != null)
+                                {
+                                    key.SetValue("HungDuyParkingBridge", Application.ExecutablePath);
+                                    System.Diagnostics.Debug.WriteLine("Added application to HKCU startup registry");
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine("Failed to open HKCU registry key for writing");
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log error but don't crash
+                            System.Diagnostics.Debug.WriteLine($"Error adding to HKCU startup registry: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Application already in HKCU startup registry");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Application already in HKLM startup registry (set by installer)");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log any unexpected errors but don't crash the application
+                System.Diagnostics.Debug.WriteLine($"Unexpected error in EnsureStartup: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Determines if the application was launched during Windows startup or by a user
+        /// </summary>
+        private bool IsLaunchedFromStartup()
+        {
+            try
+            {
+                // Check for common signs of being launched from startup:
+                
+                // 1. Process start time is close to system boot time
+                TimeSpan runningTime = DateTime.Now - Process.GetCurrentProcess().StartTime;
+                bool startedShortlyAfterBoot = runningTime.TotalMinutes < 5;
+                
+                // 2. Check command line for specific arguments that might indicate startup launch
+                string commandLine = Environment.CommandLine.ToLowerInvariant();
+                bool hasStartupArgs = commandLine.Contains("/auto") || 
+                                      commandLine.Contains("-auto") || 
+                                      commandLine.Contains("/background") || 
+                                      commandLine.Contains("-background");
+                
+                // 3. Check if explorer.exe has started recently (indicative of Windows startup)
+                bool explorerStartedRecently = false;
+                try
+                {
+                    Process[] explorerProcesses = Process.GetProcessesByName("explorer");
+                    if (explorerProcesses.Length > 0)
+                    {
+                        TimeSpan explorerRunningTime = DateTime.Now - explorerProcesses[0].StartTime;
+                        explorerStartedRecently = explorerRunningTime.TotalMinutes < 5;
+                    }
+                }
+                catch
+                {
+                    // Ignore errors checking explorer process
+                }
+                
+                // Consider it a startup launch if any of these are true
+                return startedShortlyAfterBoot || hasStartupArgs || explorerStartedRecently;
+            }
+            catch (Exception ex)
+            {
+                // If there's an error, log it and assume it's not a startup launch
+                System.Diagnostics.Debug.WriteLine($"Error in IsLaunchedFromStartup: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Determines if the application was launched from a desktop or start menu shortcut
+        /// </summary>
+        private bool IsLaunchedFromShortcut()
+        {
+            try
+            {
+                // Get command line arguments
+                string[] args = Environment.GetCommandLineArgs();
+                
+                // Check for shell integration command line arguments that indicate shortcut launch
+                if (args.Length > 1)
+                {
+                    foreach (string arg in args)
+                    {
+                        // Common shell integration argument patterns
+                        if (arg.Contains("/explorer") || 
+                            arg.Contains("-shortcut") || 
+                            arg.Contains("/desktop") || 
+                            arg.Contains("-startmenu"))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Check parent process - if explorer.exe launched us directly, likely from a shortcut
+                try
+                {
+                    Process currentProcess = Process.GetCurrentProcess();
+                    int parentProcessId = 0;
+                    
+                    // Try to get parent process ID through WMI
+                    using (var searcher = new System.Management.ManagementObjectSearcher(
+                        $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {currentProcess.Id}"))
+                    {
+                        foreach (var obj in searcher.Get())
+                        {
+                            parentProcessId = Convert.ToInt32(obj["ParentProcessId"]);
+                            break;
+                        }
+                    }
+                    
+                    if (parentProcessId > 0)
+                    {
+                        try
+                        {
+                            Process parentProcess = Process.GetProcessById(parentProcessId);
+                            if (parentProcess.ProcessName.ToLowerInvariant() == "explorer")
+                            {
+                                return true;
+                            }
+                        }
+                        catch
+                        {
+                            // Parent process may have exited
+                        }
+                    }
+                }
+                catch
+                {
+                    // If we can't determine parent process, ignore this check
+                }
+                
+                // Additional heuristic: if not running elevated and not a startup launch, 
+                // it's more likely to be a shortcut launch
+                if (!IsRunningElevated() && !IsLaunchedFromStartup())
+                {
+                    return true;
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // If there's an error, log it and assume not launched from shortcut
+                System.Diagnostics.Debug.WriteLine($"Error in IsLaunchedFromShortcut: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Checks if the application is running with elevated (administrator) privileges
+        /// </summary>
+        private bool IsRunningElevated()
+        {
+            try
+            {
+                using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+                {
+                    WindowsPrincipal principal = new WindowsPrincipal(identity);
+                    return principal.IsInRole(WindowsBuiltInRole.Administrator);
+                }
+            }
+            catch
+            {
+                // If we can't determine elevation status, assume not elevated
+                return false;
+            }
+        }
 
         private void AddToStartup()
         {
             try
             {
-                string appName = "HungDuyParkingFileReceiver_beta";
-                string exePath = Application.ExecutablePath;
-
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                if (key != null)
-                {
-                    key.SetValue(appName, exePath);
-                }
+                // Don't add to startup registry here if installer is managing startup
+                // This application will be started by the installer's registry entry if user chose that option
+                
+                // Keeping this method but not executing any code to avoid creating duplicate registry entries
+                // The InnoSetup installer now handles this task with proper cleanup of old entries
+                
+                // Original code (commented out):
+                // string appName = "HungDuyParkingFileReceiver_beta";
+                // string exePath = Application.ExecutablePath;
+                // RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                // if (key != null)
+                // {
+                //     key.SetValue(appName, exePath);
+                // }
+                
+                // Just log that startup entries are managed by the installer
+                System.Diagnostics.Debug.WriteLine("Startup entry management is handled by the installer");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Cannot add to Windows startup:\n" + ex.Message, 
+                // Still report errors if they happen
+                MessageBox.Show("Cannot manage Windows startup:\n" + ex.Message, 
                     "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
+        
         private async void MainForm_Load(object sender, EventArgs e)
         {
             SetupTray();
-            AddToStartup();
+            
+            // Only ensure startup when launched from a shortcut (not during startup or from other processes)
+            if (IsLaunchedFromShortcut())
+            {
+                EnsureStartup();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Not launched from shortcut - skipping startup registry check");
+            }
             
             // ALWAYS start HTTP and WebSocket servers regardless of authentication
             // Authentication only controls UI access, not service availability
             try
             {
+                // Extract port numbers for checking
+                int httpPort = NetworkHelper.ExtractPortFromUri(HDParkingConst.portHttp);
+                int wsPort = NetworkHelper.ExtractPortFromUri(HDParkingConst.portWebSocket);
+                
+                // Default to 5000 and 5001 if extraction fails
+                if (httpPort <= 0) httpPort = 5000;
+                if (wsPort <= 0) wsPort = 5001;
+                
+                // Check if any required ports are in use before starting servers
+                var portsInUse = NetworkHelper.GetPortsInUse(httpPort, wsPort);
+                if (portsInUse.Count > 0)
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Cannot start the server because the following ports are already in use:");
+                    
+                    foreach (var port in portsInUse)
+                    {
+                        sb.AppendLine($"• Port {port}");
+                    }
+                    
+                    sb.AppendLine("\nThe application will now close.");
+                    
+                    UpdateStatus($"Error: Required ports {string.Join(", ", portsInUse)} are in use");
+                    MessageBox.Show(sb.ToString(), "Port Conflict Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
+                    // Close the application
+                    Application.Exit();
+                    Environment.Exit(1);
+                    return;
+                }
+                
                 await _receiver.Start();
                 UpdateStatus("Running - HTTP and WebSocket servers started");
             }
             catch (Exception ex)
             {
                 UpdateStatus($"Error starting servers: {ex.Message}");
+                
+                // Show error message for other types of server start failures
+                MessageBox.Show($"Failed to start servers: {ex.Message}\n\nThe application will continue in limited mode.", 
+                    "Server Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             
             this.Hide();

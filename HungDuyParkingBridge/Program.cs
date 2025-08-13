@@ -2,6 +2,8 @@ using HungDuyParkingBridge.UI;
 using HungDuyParkingBridge.Utilities;
 using HungDuyParkingBridge.Utils;
 using System.Reflection;
+using System.Net.NetworkInformation;
+using System.Text;
 
 namespace HungDuyParkingBridge
 {
@@ -21,6 +23,12 @@ namespace HungDuyParkingBridge
                 return;
             }
 
+            // Check if required ports are already in use
+            if (!CheckRequiredPorts())
+            {
+                return; // Exit application if ports are not available
+            }
+
             // Test icon loading before starting the application
             TestIconLoading();
             
@@ -36,6 +44,54 @@ namespace HungDuyParkingBridge
             {
                 // Ensure mutex is properly released when application exits
                 SingleInstanceHelper.ReleaseMutex();
+            }
+        }
+
+        private static bool CheckRequiredPorts()
+        {
+            try
+            {
+                // Extract port numbers from the URIs
+                int httpPort = NetworkHelper.ExtractPortFromUri(HDParkingConst.portHttp);
+                int wsPort = NetworkHelper.ExtractPortFromUri(HDParkingConst.portWebSocket);
+                
+                // Default to 5000 and 5001 if extraction fails
+                if (httpPort <= 0) httpPort = 5000;
+                if (wsPort <= 0) wsPort = 5001;
+                
+                // Check if both ports are in use
+                var portsInUse = NetworkHelper.GetPortsInUse(httpPort, wsPort);
+                
+                if (portsInUse.Count > 0)
+                {
+                    // Build a meaningful error message with the specific ports
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Cannot start the application because the following ports are already in use:");
+                    
+                    foreach (var port in portsInUse)
+                    {
+                        sb.AppendLine($"• Port {port}");
+                    }
+                    
+                    sb.AppendLine("\nPossible solutions:");
+                    sb.AppendLine("1. Close other applications that might be using these ports");
+                    sb.AppendLine("2. Check if another instance of this application is already running");
+                    
+                    MessageBox.Show(sb.ToString(), 
+                        "Port Conflict Error", 
+                        MessageBoxButtons.OK, 
+                        MessageBoxIcon.Error);
+                    
+                    return false;
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log error and continue anyway, let the application handle it later
+                System.Diagnostics.Debug.WriteLine($"Error checking ports: {ex.Message}");
+                return true;
             }
         }
 
