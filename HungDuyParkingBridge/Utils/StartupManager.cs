@@ -18,62 +18,63 @@ namespace HungDuyParkingBridge.Utils
         /// </summary>
         public static void EnsureStartupEnabled()
         {
-            try
-            {
-                bool inHKLM = false;
-                bool hklmEnabled = false;
+            return;
+            //try
+            //{
+            //    bool inHKLM = false;
+            //    bool hklmEnabled = false;
 
-                // Check HKLM first (for installer-created entries)
-                try
-                {
-                    (inHKLM, hklmEnabled) = CheckStartupEntry(Registry.LocalMachine, APP_NAME);
+            //    // Check HKLM first (for installer-created entries)
+            //    try
+            //    {
+            //        (inHKLM, hklmEnabled) = CheckStartupEntry(Registry.LocalMachine, APP_NAME);
                     
-                    // If in HKLM but disabled, try to enable it (if we have admin rights)
-                    if (inHKLM && !hklmEnabled && IsRunningElevated())
-                    {
-                        EnableStartupEntry(Registry.LocalMachine, APP_NAME);
-                        Debug.WriteLine("Enabled HKLM startup entry");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Error checking/updating HKLM startup: {ex.Message}");
-                }
+            //        // If in HKLM but disabled, try to enable it (if we have admin rights)
+            //        if (inHKLM && !hklmEnabled && IsRunningElevated())
+            //        {
+            //            EnableStartupEntry(Registry.LocalMachine, APP_NAME);
+            //            Debug.WriteLine("Enabled HKLM startup entry");
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Debug.WriteLine($"Error checking/updating HKLM startup: {ex.Message}");
+            //    }
 
-                // If not in HKLM or disabled in HKLM, check/update HKCU
-                if (!inHKLM || (inHKLM && !hklmEnabled && !IsRunningElevated()))
-                {
-                    bool inHKCU = false;
-                    bool hkcuEnabled = false;
+            //    // If not in HKLM or disabled in HKLM, check/update HKCU
+            //    if (!inHKLM || (inHKLM && !hklmEnabled && !IsRunningElevated()))
+            //    {
+            //        bool inHKCU = false;
+            //        bool hkcuEnabled = false;
 
-                    try
-                    {
-                        (inHKCU, hkcuEnabled) = CheckStartupEntry(Registry.CurrentUser, APP_NAME);
+            //        try
+            //        {
+            //            (inHKCU, hkcuEnabled) = CheckStartupEntry(Registry.CurrentUser, APP_NAME);
 
-                        // If not in HKCU, add it
-                        if (!inHKCU)
-                        {
-                            AddStartupEntry(Registry.CurrentUser, APP_NAME, Application.ExecutablePath);
-                            EnableStartupEntry(Registry.CurrentUser, APP_NAME);
-                            Debug.WriteLine("Added and enabled HKCU startup entry");
-                        }
-                        // If in HKCU but disabled, enable it
-                        else if (!hkcuEnabled)
-                        {
-                            EnableStartupEntry(Registry.CurrentUser, APP_NAME);
-                            Debug.WriteLine("Enabled existing HKCU startup entry");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error checking/updating HKCU startup: {ex.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in EnsureStartupEnabled: {ex.Message}");
-            }
+            //            // If not in HKCU, add it
+            //            if (!inHKCU)
+            //            {
+            //                AddStartupEntry(Registry.CurrentUser, APP_NAME, Application.ExecutablePath);
+            //                EnableStartupEntry(Registry.CurrentUser, APP_NAME);
+            //                Debug.WriteLine("Added and enabled HKCU startup entry");
+            //            }
+            //            // If in HKCU but disabled, enable it
+            //            else if (!hkcuEnabled)
+            //            {
+            //                EnableStartupEntry(Registry.CurrentUser, APP_NAME);
+            //                Debug.WriteLine("Enabled existing HKCU startup entry");
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            Debug.WriteLine($"Error checking/updating HKCU startup: {ex.Message}");
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Debug.WriteLine($"Error in EnsureStartupEnabled: {ex.Message}");
+            //}
         }
 
         /// <summary>

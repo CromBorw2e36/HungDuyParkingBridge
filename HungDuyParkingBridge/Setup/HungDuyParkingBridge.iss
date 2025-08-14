@@ -1,5 +1,5 @@
 #define MyAppName "Hung Duy Parking Bridge"
-#define MyAppVersion "1.0.2"
+#define MyAppVersion "1.0.5"
 #define MyAppPublisher "Hung Duy Co., LTD"
 #define MyAppURL "https://hungduy.com/"
 #define MyAppExeName "HungDuyParkingBridge.exe"

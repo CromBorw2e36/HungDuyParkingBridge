@@ -856,16 +856,16 @@ namespace HungDuyParkingBridge.UI
         /// </summary>
         private void EnsureStartup()
         {
-            try
-            {
-                // Always ensure startup is enabled, regardless of how the app was launched
-                StartupManager.EnsureStartupEnabled();
-            }
-            catch (Exception ex)
-            {
-                // Log any unexpected errors but don't crash the application
-                System.Diagnostics.Debug.WriteLine($"Unexpected error in EnsureStartup: {ex.Message}");
-            }
+            //try
+            //{
+            //    // Always ensure startup is enabled, regardless of how the app was launched
+            //    StartupManager.EnsureStartupEnabled();
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Log any unexpected errors but don't crash the application
+            //    System.Diagnostics.Debug.WriteLine($"Unexpected error in EnsureStartup: {ex.Message}");
+            //}
         }
         
         /// <summary>
