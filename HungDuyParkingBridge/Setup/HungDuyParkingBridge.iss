@@ -1,0 +1,237 @@
+#define MyAppName "Hung Duy Parking Bridge"
+#define MyAppVersion "1.0.5"
+#define MyAppPublisher "Hung Duy Co., LTD"
+#define MyAppURL "https://hungduy.com/"
+#define MyAppExeName "HungDuyParkingBridge.exe"
+
+[Setup]
+; NOTE: The value of AppId uniquely identifies this application.
+; Do not use the same AppId value in installers for other applications.
+AppId={{D7B39C8E-EF6B-4A11-9E42-2F75D3B36991}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+DefaultGroupName={#MyAppName}
+AllowNoIcons=yes
+OutputDir=Output
+OutputBaseFilename=HungDuyParkingBridge_Setup
+SetupIconFile=..\logoTapDoan.ico
+Compression=lzma
+SolidCompression=yes
+PrivilegesRequired=admin
+DisableDirPage=no
+DisableProgramGroupPage=no
+UninstallDisplayIcon={app}\{#MyAppExeName}
+WizardStyle=modern
+WizardSizePercent=120
+WizardImageFile=..\Publics\Images\installer_background.bmp
+WizardSmallImageFile=..\Publics\Images\installer_small.bmp
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "vietnamese"; MessagesFile: "compiler:Languages\Vietnamese.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
+Name: "startupicon"; Description: "Start automatically when Windows starts (via Registry)"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
+
+[Files]
+Source: "..\bin\Release\net9.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Release\net9.0-windows\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Create storage directory with proper permissions
+Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion; AfterInstall: CreateStorageDir
+
+[Dirs]
+Name: "{app}\Logs"; Permissions: users-modify
+Name: "C:\HungDuyParkingReceivedFiles"; Permissions: users-modify
+
+[Icons]
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+Filename: "taskkill.exe"; Parameters: "/f /im {#MyAppExeName}"; Flags: runhidden
+
+[Registry]
+; Clean up old registry startup entries first (before installing)
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+
+; Clean up any old StartupApproved entries
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingFileReceiver_beta"; Flags: deletevalue
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueName: "HungDuyParkingBridge"; Flags: deletevalue
+
+; Add the startup entry to HKLM if we have admin rights
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HungDuyParkingBridge"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon; Check: IsAdminInstallMode
+
+; Add the enabled binary value to StartupApproved in HKLM if we have admin rights
+Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: binary; ValueName: "HungDuyParkingBridge"; ValueData: 00 00 00 00 00 00 00 00 00 00 00 00; Flags: uninsdeletevalue; Tasks: startupicon; Check: IsAdminInstallMode
+
+; Fallback to HKCU if we don't have admin rights
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "HungDuyParkingBridge"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupicon; Check: not IsAdminInstallMode
+
+; Add the enabled binary value to StartupApproved in HKCU if we don't have admin rights
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"; ValueType: binary; ValueName: "HungDuyParkingBridge"; ValueData: 00 00 00 00 00 00 00 00 00 00 00 00; Flags: uninsdeletevalue; Tasks: startupicon; Check: not IsAdminInstallMode
+
+[Code]
+// Forward declaration of the procedures
+procedure CleanupStartupEntries(); forward;
+procedure RemoveStartupShortcuts(); forward;
+
+procedure CreateStorageDir;
+var
+  ResultCode: Integer;
+begin
+  // Create the storage directory if it doesn't exist
+  if not DirExists('C:\HungDuyParkingReceivedFiles') then
+    CreateDir('C:\HungDuyParkingReceivedFiles');
+  
+  // Ensure everyone has access to this directory
+  Exec('icacls.exe', 'C:\HungDuyParkingReceivedFiles /grant Users:(OI)(CI)F /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
+  InstalledPath: String;
+  AppExePath: String;
+begin
+  // We cannot use {app} here as it's not initialized yet
+  // Instead, check if the app exists in the default installation directory
+  InstalledPath := ExpandConstant('{autopf}\{#MyAppName}');
+  AppExePath := InstalledPath + '\{#MyAppExeName}';
+  
+  if FileExists(AppExePath) then
+  begin
+    Exec('taskkill.exe', '/f /im {#MyAppExeName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    // Give some time for the app to close
+    Sleep(1000);
+  end;
+  
+  // Clean up registry startup entries manually (more thorough approach)
+  CleanupStartupEntries();
+  
+  // Also clean up any startup shortcuts from previous installations
+  RemoveStartupShortcuts();
+  
+  Result := True;
+end;
+
+procedure RemoveStartupShortcuts();
+var
+  StartupFolder, ShortcutPath: String;
+begin
+  // Get the Common Startup folder path
+  StartupFolder := ExpandConstant('{commonstartup}');
+  ShortcutPath := StartupFolder + '\' + '{#MyAppName}.lnk';
+  
+  // Delete the shortcut if it exists
+  if FileExists(ShortcutPath) then
+  begin
+    DeleteFile(ShortcutPath);
+    Log('Removed startup shortcut: ' + ShortcutPath);
+  end;
+  
+  // Also check user startup folder (just to be thorough)
+  StartupFolder := ExpandConstant('{userstartup}');
+  ShortcutPath := StartupFolder + '\' + '{#MyAppName}.lnk';
+  
+  if FileExists(ShortcutPath) then
+  begin
+    DeleteFile(ShortcutPath);
+    Log('Removed user startup shortcut: ' + ShortcutPath);
+  end;
+end;
+
+function InitializeUninstall(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  // Kill the application before uninstalling
+  Exec('taskkill.exe', '/f /im {#MyAppExeName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  // Give some time for the app to close
+  Sleep(1000);
+  
+  // Also remove any startup shortcuts that might still exist
+  RemoveStartupShortcuts();
+  
+  Result := True;
+end;
+
+// Full implementation of the procedure
+procedure CleanupStartupEntries();
+var
+  Names: TArrayOfString;
+  I: Integer;
+  HKLMKey, HKCUKey, HKLMApprovedKey, HKCUApprovedKey: String;
+begin
+  // Define the registry keys
+  HKLMKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run';
+  HKCUKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run';
+  HKLMApprovedKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run';
+  HKCUApprovedKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run';
+  
+  // List of possible old startup entry names
+  SetArrayLength(Names, 3);
+  Names[0] := 'HungDuyParkingFileReceiver';
+  Names[1] := 'HungDuyParkingFileReceiver_beta';
+  Names[2] := 'HungDuyParkingBridge';
+  
+  // Remove from HKLM Run
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKLM, HKLMKey, Names[I]) then
+    begin
+      RegDeleteValue(HKLM, HKLMKey, Names[I]);
+      Log('Removed startup entry from HKLM Run: ' + Names[I]);
+    end;
+  end;
+  
+  // Remove from HKCU Run
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKCU, HKCUKey, Names[I]) then
+    begin
+      RegDeleteValue(HKCU, HKCUKey, Names[I]);
+      Log('Removed startup entry from HKCU Run: ' + Names[I]);
+    end;
+  end;
+  
+  // Remove from HKLM StartupApproved
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKLM, HKLMApprovedKey, Names[I]) then
+    begin
+      RegDeleteValue(HKLM, HKLMApprovedKey, Names[I]);
+      Log('Removed startup entry from HKLM StartupApproved: ' + Names[I]);
+    end;
+  end;
+  
+  // Remove from HKCU StartupApproved
+  for I := 0 to GetArrayLength(Names) - 1 do
+  begin
+    if RegValueExists(HKCU, HKCUApprovedKey, Names[I]) then
+    begin
+      RegDeleteValue(HKCU, HKCUApprovedKey, Names[I]);
+      Log('Removed startup entry from HKCU StartupApproved: ' + Names[I]);
+    end;
+  end;
+end;

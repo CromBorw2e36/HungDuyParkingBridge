@@ -458,6 +458,177 @@ namespace HungDuyParkingBridge.UI
         {
             return ResourceHelper.GetApplicationIcon();
         }
+<<<<<<< Updated upstream
+=======
+        
+        /// <summary>
+        /// Checks if this application is set to run at startup via registry entries.
+        /// If no registry startup entry exists, creates one in HKCU.
+        /// Also ensures the startup entry is enabled in Task Manager.
+        /// </summary>
+        private void EnsureStartup()
+        {
+            return;
+            //try
+            //{
+            //    // Always ensure startup is enabled, regardless of how the app was launched
+            //    StartupManager.EnsureStartupEnabled();
+            //}
+            //catch (Exception ex)
+            //{
+            //    // Log any unexpected errors but don't crash the application
+            //    System.Diagnostics.Debug.WriteLine($"Unexpected error in EnsureStartup: {ex.Message}");
+            //}
+        }
+        
+        /// <summary>
+        /// Determines if the application was launched during Windows startup or by a user
+        /// </summary>
+        private bool IsLaunchedFromStartup()
+        {
+            try
+            {
+                // Check for common signs of being launched from startup:
+                
+                // 1. Process start time is close to system boot time
+                TimeSpan runningTime = DateTime.Now - Process.GetCurrentProcess().StartTime;
+                bool startedShortlyAfterBoot = runningTime.TotalMinutes < 5;
+                
+                // 2. Check command line for specific arguments that might indicate startup launch
+                string commandLine = Environment.CommandLine.ToLowerInvariant();
+                bool hasStartupArgs = commandLine.Contains("/auto") || 
+                                      commandLine.Contains("-auto") || 
+                                      commandLine.Contains("/background") || 
+                                      commandLine.Contains("-background");
+                
+                // 3. Check if explorer.exe has started recently (indicative of Windows startup)
+                bool explorerStartedRecently = false;
+                try
+                {
+                    Process[] explorerProcesses = Process.GetProcessesByName("explorer");
+                    if (explorerProcesses.Length > 0)
+                    {
+                        TimeSpan explorerRunningTime = DateTime.Now - explorerProcesses[0].StartTime;
+                        explorerStartedRecently = explorerRunningTime.TotalMinutes < 5;
+                    }
+                }
+                catch
+                {
+                    // Ignore errors checking explorer process
+                }
+                
+                // Consider it a startup launch if any of these are true
+                return startedShortlyAfterBoot || hasStartupArgs || explorerStartedRecently;
+            }
+            catch (Exception ex)
+            {
+                // If there's an error, log it and assume it's not a startup launch
+                System.Diagnostics.Debug.WriteLine($"Error in IsLaunchedFromStartup: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Determines if the application was launched from a desktop or start menu shortcut
+        /// </summary>
+        private bool IsLaunchedFromShortcut()
+        {
+            try
+            {
+                // Get command line arguments
+                string[] args = Environment.GetCommandLineArgs();
+                
+                // Check for shell integration command line arguments that indicate shortcut launch
+                if (args.Length > 1)
+                {
+                    foreach (string arg in args)
+                    {
+                        // Common shell integration argument patterns
+                        if (arg.Contains("/explorer") || 
+                            arg.Contains("-shortcut") || 
+                            arg.Contains("/desktop") || 
+                            arg.Contains("-startmenu"))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Check parent process - if explorer.exe launched us directly, likely from a shortcut
+                try
+                {
+                    Process currentProcess = Process.GetCurrentProcess();
+                    int parentProcessId = 0;
+                    
+                    // Try to get parent process ID through WMI
+                    using (var searcher = new System.Management.ManagementObjectSearcher(
+                        $"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {currentProcess.Id}"))
+                    {
+                        foreach (var obj in searcher.Get())
+                        {
+                            parentProcessId = Convert.ToInt32(obj["ParentProcessId"]);
+                            break;
+                        }
+                    }
+                    
+                    if (parentProcessId > 0)
+                    {
+                        try
+                        {
+                            Process parentProcess = Process.GetProcessById(parentProcessId);
+                            if (parentProcess.ProcessName.ToLowerInvariant() == "explorer")
+                            {
+                                return true;
+                            }
+                        }
+                        catch
+                        {
+                            // Parent process may have exited
+                        }
+                    }
+                }
+                catch
+                {
+                    // If we can't determine parent process, ignore this check
+                }
+                
+                // Additional heuristic: if not running elevated and not a startup launch, 
+                // it's more likely to be a shortcut launch
+                if (!IsRunningElevated() && !IsLaunchedFromStartup())
+                {
+                    return true;
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // If there's an error, log it and assume not launched from shortcut
+                System.Diagnostics.Debug.WriteLine($"Error in IsLaunchedFromShortcut: {ex.Message}");
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Checks if the application is running with elevated (administrator) privileges
+        /// </summary>
+        private bool IsRunningElevated()
+        {
+            try
+            {
+                using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+                {
+                    WindowsPrincipal principal = new WindowsPrincipal(identity);
+                    return principal.IsInRole(WindowsBuiltInRole.Administrator);
+                }
+            }
+            catch
+            {
+                // If we can't determine elevation status, assume not elevated
+                return false;
+            }
+        }
+>>>>>>> Stashed changes
 
         private void AddToStartup()
         {

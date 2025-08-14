@@ -15,6 +15,20 @@ namespace HungDuyParkingBridge
             // Test icon loading before starting the application
             TestIconLoading();
             
+<<<<<<< Updated upstream
+=======
+            // Ensure startup registry entries exist and are enabled
+            //try
+            //{
+            //    StartupManager.EnsureStartupEnabled();
+            //}
+            //catch (Exception ex)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Error ensuring startup on application launch: {ex.Message}");
+            //    // Continue even if there's an error with startup registration
+            //}
+            
+>>>>>>> Stashed changes
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
