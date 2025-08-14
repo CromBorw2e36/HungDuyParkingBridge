@@ -133,7 +133,7 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/status" -Method GET
 curl http://localhost:5000/api/status
 
 # Test health endpoint  
-curl http://localhost:5000/api/health
+curl http://localhost:5000/api/healthx
 
 # Test ping endpoint
 curl http://localhost:5000/api/ping
